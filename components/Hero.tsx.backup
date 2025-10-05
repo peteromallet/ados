@@ -1,0 +1,193 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/Button'
+import { VideoModal } from '@/components/VideoModal'
+import { InfoTooltip } from '@/components/InfoTooltip'
+import { VibeToggle } from '@/components/VibeToggle'
+import { motion } from 'framer-motion'
+import { Play } from 'lucide-react'
+
+export function Hero() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [vibe, setVibe] = useState<'chill' | 'epic'>('epic')
+  const [isGlitching, setIsGlitching] = useState(false)
+
+  const handleVibeChange = (newVibe: 'chill' | 'epic') => {
+    if (newVibe === vibe) return
+    
+    setIsGlitching(true)
+    setTimeout(() => {
+      setVibe(newVibe)
+    }, 300) // Change content mid-glitch
+    setTimeout(() => {
+      setIsGlitching(false)
+    }, 600) // End glitch
+  }
+
+  const content = {
+    chill: {
+      subtitle: 'A celebration of art and open source AI',
+      date: 'Los Angeles | November 7th',
+      cta: 'Apply to Join',
+      watchTrailer: 'Watch the Trailer',
+      whatIsIt: 'ADOS is a one-day celebration bringing together artists, developers, and AI enthusiasts to explore the intersection of creativity and open-source artificial intelligence through workshops, demos, and collaborative projects.',
+      whoIsItFor: 'For artists exploring AI tools, developers building creative applications, researchers in generative AI, and anyone passionate about the intersection of art and open-source technology.',
+    },
+    epic: {
+      subtitle: 'AN EPIC CONVERGENCE OF ART & OPEN-SOURCE AI',
+      date: 'Los Angeles | November 7th',
+      cta: 'Are you worthy?',
+      watchTrailer: 'Feast your eyes',
+      whatIsIt: 'ADOS is a LEGENDARY gathering where visionary artists, elite developers, and AI pioneers unite to REVOLUTIONIZE creativity through open-source intelligence. Experience groundbreaking workshops, mind-blowing demos, and forge UNSTOPPABLE collaborations.',
+      whoIsItFor: 'For BOLD creators wielding AI as their weapon, FEARLESS developers architecting the future, cutting-edge researchers, and RELENTLESS innovators ready to DOMINATE the intersection of art and technology.',
+    },
+  }
+
+  return (
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background Video */}
+      <motion.video
+        key={vibe}
+        autoPlay
+        loop
+        muted
+        playsInline
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          filter: isGlitching ? 'blur(4px) saturate(2)' : 'none',
+        }}
+      >
+        <source src="/bg.mp4" type="video/mp4" />
+      </motion.video>
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      {/* Glitch Overlay */}
+      {isGlitching && (
+        <>
+          <motion.div
+            className="absolute inset-0 z-20 pointer-events-none"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px)',
+            }}
+            animate={{
+              opacity: [0, 1, 0],
+            }}
+            transition={{ duration: 0.6 }}
+          />
+          <motion.div
+            className="absolute inset-0 z-20 pointer-events-none mix-blend-screen"
+            animate={{
+              background: [
+                'linear-gradient(90deg, red 0%, transparent 50%, blue 100%)',
+                'linear-gradient(90deg, transparent 0%, red 50%, transparent 100%)',
+                'linear-gradient(90deg, blue 0%, transparent 50%, red 100%)',
+              ],
+              opacity: [0.3, 0.6, 0.3, 0],
+            }}
+            transition={{ duration: 0.6 }}
+          />
+        </>
+      )}
+
+      {/* Content */}
+      <motion.div 
+        className="relative z-10 text-center px-4 w-full"
+        animate={isGlitching ? {
+          x: [0, -10, 10, -5, 5, 0],
+          filter: [
+            'hue-rotate(0deg)',
+            'hue-rotate(10deg)',
+            'hue-rotate(-10deg)',
+            'hue-rotate(0deg)',
+          ],
+        } : {}}
+        transition={{ duration: 0.6 }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col items-center w-full"
+        >
+          <div className="w-full max-w-5xl flex flex-col items-center">
+            <h1 className="text-8xl md:text-9xl font-black text-white mb-8 uppercase text-center">
+              <span className="inline-block tracking-[0.5em] -mr-[0.5em]">ADOS</span>
+            </h1>
+            <motion.p 
+              key={`subtitle-${vibe}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-xl md:text-2xl text-white mb-4 font-light uppercase text-center"
+            >
+              <span className="inline-block tracking-[0.2em] -mr-[0.2em]">{content[vibe].subtitle}</span>
+            </motion.p>
+            <motion.p
+              key={`date-${vibe}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-sm md:text-base text-white/70 mb-12 font-light uppercase text-center"
+            >
+              <span className="inline-block tracking-[0.2em] -mr-[0.2em]">{content[vibe].date}</span>
+            </motion.p>
+          </div>
+          <div className="flex flex-col gap-6 items-center">
+            <Link href="/events">
+              <motion.div
+                key={`cta-${vibe}`}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Button size="lg" className="min-w-[200px]">
+                  {content[vibe].cta}
+                </Button>
+              </motion.div>
+            </Link>
+            
+            <motion.button
+              key={`trailer-${vibe}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors text-sm uppercase tracking-wide"
+            >
+              <Play size={20} />
+              <span>{content[vibe].watchTrailer}</span>
+            </motion.button>
+
+            <div className="flex items-center gap-6 mt-2">
+              <InfoTooltip
+                trigger="What is it?"
+                content={content[vibe].whatIsIt}
+              />
+              <span className="text-white/40">|</span>
+              <InfoTooltip
+                trigger="Who's it for?"
+                content={content[vibe].whoIsItFor}
+              />
+            </div>
+
+            {/* Vibe Toggle below info tooltips */}
+            <div className="mt-8">
+              <VibeToggle value={vibe} onChange={handleVibeChange} />
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      <VideoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        videoSrc="/bg.mp4"
+      />
+    </div>
+  )
+}
+
