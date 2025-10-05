@@ -176,7 +176,7 @@ export default function EventDetailPage() {
   const isFull = false // TODO: Implement attendance counting
 
   return (
-    <div className="relative min-h-screen pt-8 sm:pt-16 md:pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen pt-8 sm:pt-12 md:pt-16 pb-12 px-4 sm:px-6 lg:px-8">
       {/* Background Video */}
       <video
         autoPlay
