@@ -30,11 +30,11 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
-            className={`absolute bottom-full mb-3 backdrop-blur-sm p-4 rounded-lg text-sm text-left whitespace-pre-line z-50 w-64 ${
+            className={`absolute top-full mt-3 backdrop-blur-sm p-4 rounded-lg text-sm text-left whitespace-pre-line z-50 w-64 max-h-[60vh] overflow-y-auto ${
               isDark
                 ? 'bg-white/90 text-black border border-black/20'
                 : 'bg-black/90 text-white border border-white/20'
@@ -47,15 +47,15 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
           >
             {content}
             <div 
-              className={`absolute top-full w-3 h-3 ${
+              className={`absolute bottom-full w-3 h-3 ${
                 isDark
-                  ? 'bg-white/90 border-r border-b border-black/20'
-                  : 'bg-black/90 border-r border-b border-white/20'
+                  ? 'bg-white/90 border-l border-t border-black/20'
+                  : 'bg-black/90 border-l border-t border-white/20'
               }`}
               style={{
                 left: '50%',
                 marginLeft: '-6px',
-                marginTop: '-6px',
+                marginBottom: '-6px',
                 transform: 'rotate(45deg)',
               }}
             ></div>
