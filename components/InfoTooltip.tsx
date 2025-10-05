@@ -45,7 +45,7 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
             className="md:hidden fixed left-0 right-0 z-[9999] flex justify-center items-end pb-4 pointer-events-none"
             style={{
               top: 0,
-              bottom: `calc(100vh - ${buttonTop}px)`, // Position so bottom aligns with button top
+              height: `${buttonTop}px`, // Container goes from top to button position
             }}
             onClick={() => setIsOpen(false)}
           >
