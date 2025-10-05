@@ -22,10 +22,15 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
 
   useEffect(() => {
     if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      setPosition({
-        top: rect.top,
-        left: rect.left + rect.width / 2,
+      // Defer measurement until the next frame to ensure layout is stable
+      requestAnimationFrame(() => {
+        if (buttonRef.current) {
+          const rect = buttonRef.current.getBoundingClientRect()
+          setPosition({
+            top: rect.top,
+            left: rect.left + rect.width / 2,
+          })
+        }
       })
     }
   }, [isOpen])
