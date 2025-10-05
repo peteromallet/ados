@@ -142,8 +142,8 @@ export default function ApplyPage() {
         </div>
       )}
       
-      {!loading && !showAuthModal && isAuthenticated && event && event.questions && event.questions.length > 0 && (
-        <div className="min-h-screen pt-24 bg-background">
+          {!loading && !showAuthModal && isAuthenticated && event && event.questions && event.questions.length > 0 && (
+            <div className="min-h-screen pt-8 sm:pt-16 md:pt-24 bg-white">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-text-dark mb-2">Apply to {event.name}</h1>
             <p className="text-text-light">Please answer the following questions</p>

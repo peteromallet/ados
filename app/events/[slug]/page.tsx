@@ -176,16 +176,31 @@ export default function EventDetailPage() {
   const isFull = false // TODO: Implement attendance counting
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="relative min-h-screen pt-8 sm:pt-16 md:pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      {/* Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        poster="/bg_poster.jpg"
+        className="fixed inset-0 w-full h-full object-cover -z-10"
+      >
+        <source src="/bg.mp4" type="video/mp4" />
+      </video>
+
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-black/40 -z-10" />
+
+      <div className="max-w-4xl mx-auto relative z-10">
         {/* Hero Section */}
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center text-text-light hover:text-text-dark transition-colors mb-4">
+          <Link href="/" className="inline-flex items-center text-white hover:text-gray-200 transition-colors mb-4">
             <ArrowLeft size={24} />
           </Link>
-          <h1 className="text-5xl font-bold text-text-dark mb-4">{event.name}</h1>
+          <h1 className="text-5xl font-bold text-white mb-4">{event.name}</h1>
 
-          <div className="flex flex-wrap gap-4 text-text-light mb-6">
+          <div className="flex flex-wrap gap-4 text-white/80 mb-6">
             {event.date && (
               <div className="flex items-center space-x-2">
                 <Calendar size={20} />
@@ -203,23 +218,23 @@ export default function EventDetailPage() {
 
         {/* Status Badge */}
         {hasApplied && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 font-semibold">
+          <div className="mb-6 p-4 bg-blue-100/90 backdrop-blur-sm border border-blue-300 rounded-lg">
+            <p className="text-blue-900 font-semibold">
               ✓ You have already applied to this event
             </p>
           </div>
         )}
 
         {isFull && !hasApplied && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800 font-semibold">
+          <div className="mb-6 p-4 bg-yellow-100/90 backdrop-blur-sm border border-yellow-300 rounded-lg">
+            <p className="text-yellow-900 font-semibold">
               This event has reached maximum capacity
             </p>
           </div>
         )}
 
         {/* Description */}
-        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-xl p-8 mb-8">
           <p className="text-text-light text-lg leading-relaxed mb-6">
             Join us in LA.
           </p>
@@ -255,7 +270,7 @@ export default function EventDetailPage() {
               </Button>
               <button
                 onClick={handleInviteClick}
-                className="text-text-light hover:text-text-dark transition-colors text-sm underline"
+                className="text-white/80 hover:text-white transition-colors text-sm underline"
               >
                 I was invited
               </button>

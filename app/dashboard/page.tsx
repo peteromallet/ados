@@ -59,7 +59,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-background">
+    <div className="min-h-screen pt-8 sm:pt-16 md:pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-6xl mx-auto">
         {/* Profile Section */}
         <div className="mb-8">
