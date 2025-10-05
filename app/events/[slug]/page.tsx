@@ -18,6 +18,7 @@ export default function EventDetailPage() {
   const supabase = createClient()
   const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [hasApplied, setHasApplied] = useState(false)
@@ -38,7 +39,12 @@ export default function EventDetailPage() {
           .eq('slug', params.slug as string)
           .single()
 
-        if (error) throw error
+        if (error) {
+          console.error('Error loading event:', error)
+          setError(error.message || 'Failed to load event')
+          setLoading(false)
+          return
+        }
 
         if (user) {
           const { data: attendance } = await supabase
@@ -54,6 +60,7 @@ export default function EventDetailPage() {
         setEvent(eventData)
       } catch (err) {
         console.error('Error loading event:', err)
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred')
       } finally {
         setLoading(false)
       }
@@ -159,16 +166,24 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center">
+      <div className="min-h-screen pt-24 flex items-center justify-center bg-white">
         <p className="text-xl text-text-light">Loading...</p>
       </div>
     )
   }
 
-  if (!event) {
+  if (error || !event) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center">
-        <p className="text-xl text-red-500">Event not found</p>
+      <div className="min-h-screen pt-24 flex items-center justify-center bg-white">
+        <div className="text-center">
+          <p className="text-xl text-red-500 mb-2">
+            {error || 'Event not found'}
+          </p>
+          <p className="text-sm text-gray-500 mb-4">Slug: {params.slug}</p>
+          <Link href="/" className="text-blue-500 hover:underline">
+            Return to home
+          </Link>
+        </div>
       </div>
     )
   }
