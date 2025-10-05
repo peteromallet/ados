@@ -8,9 +8,10 @@ interface InfoTooltipProps {
   trigger: string
   content: ReactNode
   isDark?: boolean
+  arrowPosition?: 'left' | 'center' | 'right'
 }
 
-export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipProps) {
+export function InfoTooltip({ trigger, content, isDark = false, arrowPosition = 'center' }: InfoTooltipProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [buttonTop, setButtonTop] = useState(0)
@@ -54,7 +55,7 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
-              className={`backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line pointer-events-auto ${
+              className={`backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line pointer-events-auto relative ${
                 isDark
                   ? 'bg-white/95 text-black border border-black/20 shadow-xl'
                   : 'bg-black/95 text-white border border-white/20 shadow-xl'
@@ -66,6 +67,21 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
               onClick={(e) => e.stopPropagation()}
             >
               {content}
+              
+              {/* Arrow pointing down */}
+              <div 
+                className={`absolute w-3 h-3 ${
+                  isDark
+                    ? 'bg-white/95 border-r border-b border-black/20'
+                    : 'bg-black/95 border-r border-b border-white/20'
+                }`}
+                style={{
+                  bottom: '-6px',
+                  left: arrowPosition === 'left' ? '20%' : arrowPosition === 'right' ? '80%' : '50%',
+                  marginLeft: '-6px',
+                  transform: 'rotate(45deg)',
+                }}
+              />
             </motion.div>
           </div>
         </>

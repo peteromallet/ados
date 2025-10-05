@@ -306,18 +306,21 @@ export function Hero() {
                     trigger={vibe === 'epic' ? 'Purpose' : 'Why'}
                     content={content[vibe].whyGather}
                     isDark={vibe === 'epic'}
+                    arrowPosition="left"
                   />
                   <span className={vibe === 'epic' ? 'text-black/40' : 'text-white/40'}>|</span>
                   <InfoTooltip
                     trigger={vibe === 'epic' ? 'Vision' : 'What'}
                     content={content[vibe].whatIsIt}
                     isDark={vibe === 'epic'}
+                    arrowPosition="center"
                   />
                   <span className={vibe === 'epic' ? 'text-black/40' : 'text-white/40'}>|</span>
                   <InfoTooltip
                     trigger={vibe === 'epic' ? 'Group' : 'Who'}
                     content={content[vibe].whoIsItFor}
                     isDark={vibe === 'epic'}
+                    arrowPosition="right"
                   />
                 </div>
 
