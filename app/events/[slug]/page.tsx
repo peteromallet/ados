@@ -207,9 +207,6 @@ export default function EventDetailPage() {
             <p className="text-blue-800 font-semibold">
               ✓ You have already applied to this event
             </p>
-            <p className="text-blue-600 text-sm mt-1">
-              Status: <span className="capitalize">{event.user_attendance.status}</span>
-            </p>
           </div>
         )}
 
