@@ -229,7 +229,7 @@ export function Hero() {
 
       {/* Content */}
       <motion.div 
-        className="relative z-10 text-center px-6 w-full flex items-center justify-center min-h-screen"
+        className="relative z-10 text-center px-6 w-full"
         animate={isGlitching ? {
           scale: [1, 0.95, 1.02, 1],
           rotateZ: rotationDirection === 'right' ? [0, -2, 2, 0] : [0, 2, -2, 0],
