@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ReactNode, useEffect } from 'react'
+import { useState, ReactNode, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -13,10 +13,22 @@ interface InfoTooltipProps {
 export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setPosition({
+        top: rect.top,
+        left: rect.left + rect.width / 2,
+      })
+    }
+  }, [isOpen])
 
   const mobileTooltip = (
     <AnimatePresence>
@@ -31,30 +43,43 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Centering container */}
-          <div
-            className="md:hidden fixed inset-0 z-[9999] flex justify-center items-start pt-24 pointer-events-none"
-            onClick={() => setIsOpen(false)}
+          {/* Tooltip positioned above trigger */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+            className={`md:hidden fixed backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line z-[9999] ${
+              isDark
+                ? 'bg-white/95 text-black border border-black/20 shadow-xl'
+                : 'bg-black/95 text-white border border-white/20 shadow-xl'
+            }`}
+            style={{
+              bottom: `calc(100vh - ${position.top}px + 0.75rem)`,
+              left: `${position.left}px`,
+              transform: 'translateX(-50%)',
+              width: '85vw',
+              maxWidth: '24rem',
+            }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
-              className={`backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line pointer-events-auto ${
+            {content}
+            
+            {/* Arrow pointing down to trigger */}
+            <div 
+              className={`absolute w-3 h-3 ${
                 isDark
-                  ? 'bg-white/95 text-black border border-black/20 shadow-xl'
-                  : 'bg-black/95 text-white border border-white/20 shadow-xl'
+                  ? 'bg-white/95 border-r border-b border-black/20'
+                  : 'bg-black/95 border-r border-b border-white/20'
               }`}
               style={{
-                width: '85vw',
-                maxWidth: '24rem',
+                bottom: '-6px',
+                left: '50%',
+                marginLeft: '-6px',
+                transform: 'rotate(45deg)',
               }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {content}
-            </motion.div>
-          </div>
+            />
+          </motion.div>
         </>
       )}
     </AnimatePresence>
@@ -64,6 +89,7 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
     <>
       <div className="relative flex items-center justify-center">
         <button
+          ref={buttonRef}
           onClick={() => setIsOpen(!isOpen)}
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
