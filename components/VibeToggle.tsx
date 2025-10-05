@@ -60,9 +60,7 @@ export function VibeToggle({ value, onChange }: VibeToggleProps) {
         className={`text-sm uppercase tracking-wider transition-all ${
           vibe === 'epic'
             ? 'text-black font-semibold'
-            : vibe === 'epic'
-              ? 'text-black/50 hover:text-black/75'
-              : 'text-white/50 hover:text-white/75'
+            : 'text-white/50 hover:text-white/75'
         }`}
       >
         Epic
