@@ -22,15 +22,10 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
 
   useEffect(() => {
     if (isOpen && buttonRef.current) {
-      // Defer measurement until the next frame to ensure layout is stable
-      requestAnimationFrame(() => {
-        if (buttonRef.current) {
-          const rect = buttonRef.current.getBoundingClientRect()
-          setPosition({
-            top: rect.top,
-            left: rect.left + rect.width / 2,
-          })
-        }
+      const rect = buttonRef.current.getBoundingClientRect()
+      setPosition({
+        top: rect.top,
+        left: rect.left + rect.width / 2, // Already centered
       })
     }
   }, [isOpen])
@@ -48,43 +43,49 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Tooltip positioned above trigger */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
-            className={`md:hidden fixed backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line z-[9999] ${
-              isDark
-                ? 'bg-white/95 text-black border border-black/20 shadow-xl'
-                : 'bg-black/95 text-white border border-white/20 shadow-xl'
-            }`}
+          {/* Positioning wrapper at button center */}
+          <div
+            className="md:hidden fixed z-[9999]"
             style={{
               bottom: `calc(100vh - ${position.top}px + 0.75rem)`,
               left: `${position.left}px`,
               transform: 'translateX(-50%)',
-              width: '85vw',
-              maxWidth: '24rem',
             }}
-            onClick={(e) => e.stopPropagation()}
           >
-            {content}
-            
-            {/* Arrow pointing down to trigger */}
-            <div 
-              className={`absolute w-3 h-3 ${
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className={`backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line ${
                 isDark
-                  ? 'bg-white/95 border-r border-b border-black/20'
-                  : 'bg-black/95 border-r border-b border-white/20'
+                  ? 'bg-white/95 text-black border border-black/20 shadow-xl'
+                  : 'bg-black/95 text-white border border-white/20 shadow-xl'
               }`}
               style={{
-                bottom: '-6px',
-                left: '50%',
-                marginLeft: '-6px',
-                transform: 'rotate(45deg)',
+                width: '85vw',
+                maxWidth: '24rem',
               }}
-            />
-          </motion.div>
+              onClick={(e) => e.stopPropagation()}
+            >
+              {content}
+              
+              {/* Arrow pointing down to trigger */}
+              <div 
+                className={`absolute w-3 h-3 ${
+                  isDark
+                    ? 'bg-white/95 border-r border-b border-black/20'
+                    : 'bg-black/95 border-r border-b border-white/20'
+                }`}
+                style={{
+                  bottom: '-6px',
+                  left: '50%',
+                  marginLeft: '-6px',
+                  transform: 'rotate(45deg)',
+                }}
+              />
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
