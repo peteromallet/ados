@@ -79,13 +79,13 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Mobile tooltip - fixed at center */}
+            {/* Mobile tooltip - fixed at top center */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
-              className={`md:hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line z-[9999] w-[85vw] max-w-sm ${
+              className={`md:hidden fixed top-24 left-1/2 -translate-x-1/2 backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line z-[9999] w-[85vw] max-w-sm ${
                 isDark
                   ? 'bg-white/95 text-black border border-black/20 shadow-xl'
                   : 'bg-black/95 text-white border border-white/20 shadow-xl'
