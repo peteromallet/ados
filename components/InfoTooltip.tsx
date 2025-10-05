@@ -13,7 +13,7 @@ interface InfoTooltipProps {
 export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const [buttonTop, setButtonTop] = useState(0)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -23,10 +23,7 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
-      setPosition({
-        top: rect.top,
-        left: rect.left + rect.width / 2, // Already centered
-      })
+      setButtonTop(rect.top)
     }
   }, [isOpen])
 
@@ -43,21 +40,21 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Positioning wrapper at button center */}
+          {/* Centering container */}
           <div
-            className="md:hidden fixed z-[9999]"
+            className="md:hidden fixed inset-0 z-[9999] flex justify-center pointer-events-none"
             style={{
-              bottom: `calc(100vh - ${position.top}px + 0.75rem)`,
-              left: `${position.left}px`,
-              transform: 'translateX(-50%)',
+              alignItems: 'flex-start',
+              paddingTop: `${Math.max(20, buttonTop - 300)}px`, // Position above button with fallback
             }}
+            onClick={() => setIsOpen(false)}
           >
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
-              className={`backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line ${
+              className={`backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line pointer-events-auto ${
                 isDark
                   ? 'bg-white/95 text-black border border-black/20 shadow-xl'
                   : 'bg-black/95 text-white border border-white/20 shadow-xl'
@@ -69,21 +66,6 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
               onClick={(e) => e.stopPropagation()}
             >
               {content}
-              
-              {/* Arrow pointing down to trigger */}
-              <div 
-                className={`absolute w-3 h-3 ${
-                  isDark
-                    ? 'bg-white/95 border-r border-b border-black/20'
-                    : 'bg-black/95 border-r border-b border-white/20'
-                }`}
-                style={{
-                  bottom: '-6px',
-                  left: '50%',
-                  marginLeft: '-6px',
-                  transform: 'rotate(45deg)',
-                }}
-              />
             </motion.div>
           </div>
         </>
