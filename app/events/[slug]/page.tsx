@@ -166,7 +166,7 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center bg-white px-4">
+      <div className="h-screen flex items-center justify-center bg-white px-4">
         <p className="text-lg sm:text-xl text-text-light">Loading...</p>
       </div>
     )
@@ -174,7 +174,7 @@ export default function EventDetailPage() {
 
   if (error || !event) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center bg-white px-4">
+      <div className="h-screen flex items-center justify-center bg-white px-4">
         <div className="text-center">
           <p className="text-lg sm:text-xl text-red-500 mb-2">
             {error || 'Event not found'}
@@ -191,7 +191,7 @@ export default function EventDetailPage() {
   const isFull = false // TODO: Implement attendance counting
 
   return (
-    <div className="relative min-h-screen pt-8 sm:pt-12 md:pt-16 pb-6 sm:pb-12 px-4 sm:px-6 lg:px-8">
+    <>
       {/* Background Video */}
       <video
         autoPlay
@@ -207,7 +207,8 @@ export default function EventDetailPage() {
       {/* Overlay */}
       <div className="fixed inset-0 bg-black/40 -z-10" />
 
-      <div className="max-w-4xl mx-auto relative z-10">
+      <div className="relative pt-8 sm:pt-12 md:pt-16 pb-6 sm:pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto relative z-10">
         {/* Hero Section */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
@@ -294,82 +295,83 @@ export default function EventDetailPage() {
             </>
           )}
         </div>
-
-        {/* Auth Modal */}
-        <AuthModal
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          redirectTo={`/events/${event.slug}/apply`}
-        />
-
-        {/* Invite Code Modal */}
-        <AnimatePresence>
-          {showInviteModal && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-              />
-
-              {/* Modal */}
-              <motion.div
-                initial={{ opacity: 0, y: -50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -50 }}
-                className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                onClick={() => setShowInviteModal(false)}
-              >
-                <div 
-                  className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md relative"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    onClick={() => setShowInviteModal(false)}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <X size={24} />
-                  </button>
-
-                  <div className="text-center">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Enter Invite Code</h2>
-                    <p className="text-gray-600 mb-8">
-                      If you were personally invited, enter your code below
-                    </p>
-
-                    {inviteError && (
-                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
-                        {inviteError}
-                      </div>
-                    )}
-
-                    <form onSubmit={(e) => { e.preventDefault(); handleInviteSubmit(); }}>
-                      <Input
-                        type="text"
-                        placeholder="Enter your invite code"
-                        value={inviteCode}
-                        onChange={(e) => setInviteCode(e.target.value)}
-                        className="mb-4"
-                      />
-                      <Button
-                        type="submit"
-                        disabled={isSubmittingInvite || !inviteCode.trim()}
-                        size="lg"
-                        className="w-full"
-                      >
-                        {isSubmittingInvite ? 'Processing...' : 'Submit'}
-                      </Button>
-                    </form>
-                  </div>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+        </div>
       </div>
-    </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        redirectTo={`/events/${event.slug}/apply`}
+      />
+
+      {/* Invite Code Modal */}
+      <AnimatePresence>
+        {showInviteModal && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              onClick={() => setShowInviteModal(false)}
+            >
+              <div 
+                className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setShowInviteModal(false)}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+
+                <div className="text-center">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Enter Invite Code</h2>
+                  <p className="text-gray-600 mb-8">
+                    If you were personally invited, enter your code below
+                  </p>
+
+                  {inviteError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+                      {inviteError}
+                    </div>
+                  )}
+
+                  <form onSubmit={(e) => { e.preventDefault(); handleInviteSubmit(); }}>
+                    <Input
+                      type="text"
+                      placeholder="Enter your invite code"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      className="mb-4"
+                    />
+                    <Button
+                      type="submit"
+                      disabled={isSubmittingInvite || !inviteCode.trim()}
+                      size="lg"
+                      className="w-full"
+                    >
+                      {isSubmittingInvite ? 'Processing...' : 'Submit'}
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
