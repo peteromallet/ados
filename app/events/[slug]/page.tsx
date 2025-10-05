@@ -210,10 +210,12 @@ export default function EventDetailPage() {
       <div className="max-w-4xl mx-auto relative z-10">
         {/* Hero Section */}
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center text-white hover:text-gray-200 transition-colors mb-4">
-            <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
-          </Link>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">{event.name}</h1>
+          <div className="flex items-center gap-3 mb-4">
+            <Link href="/" className="inline-flex items-center text-white hover:text-gray-200 transition-colors">
+              <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
+            </Link>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">{event.name}</h1>
+          </div>
 
           <div className="flex flex-wrap gap-3 sm:gap-4 text-sm sm:text-base text-white/80 mb-6">
             {event.date && (
