@@ -31,28 +31,30 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Mobile tooltip - explicitly centered */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className={`md:hidden fixed backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line z-[9999] ${
-              isDark
-                ? 'bg-white/95 text-black border border-black/20 shadow-xl'
-                : 'bg-black/95 text-white border border-white/20 shadow-xl'
-            }`}
-            style={{
-              top: '6rem',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '85vw',
-              maxWidth: '24rem',
-            }}
-            onClick={(e) => e.stopPropagation()}
+          {/* Centering container */}
+          <div
+            className="md:hidden fixed inset-0 z-[9999] flex justify-center items-start pt-24 pointer-events-none"
+            onClick={() => setIsOpen(false)}
           >
-            {content}
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className={`backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line pointer-events-auto ${
+                isDark
+                  ? 'bg-white/95 text-black border border-black/20 shadow-xl'
+                  : 'bg-black/95 text-white border border-white/20 shadow-xl'
+              }`}
+              style={{
+                width: '85vw',
+                maxWidth: '24rem',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {content}
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
