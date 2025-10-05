@@ -42,10 +42,10 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
 
           {/* Centering container */}
           <div
-            className="md:hidden fixed inset-0 z-[9999] flex justify-center pointer-events-none"
+            className="md:hidden fixed left-0 right-0 z-[9999] flex justify-center items-end pb-4 pointer-events-none"
             style={{
-              alignItems: 'flex-start',
-              paddingTop: `${Math.max(20, buttonTop - 300)}px`, // Position above button with fallback
+              top: 0,
+              bottom: `calc(100vh - ${buttonTop}px)`, // Position so bottom aligns with button top
             }}
             onClick={() => setIsOpen(false)}
           >
