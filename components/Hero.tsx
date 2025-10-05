@@ -15,6 +15,7 @@ export function Hero() {
   const [isGlitching, setIsGlitching] = useState(false)
   const [rotationDirection, setRotationDirection] = useState<'left' | 'right'>('left')
   const videoRef = useRef<HTMLVideoElement>(null)
+  const preloadVideoRef = useRef<HTMLVideoElement>(null)
 
   const handleVibeChange = (newVibe: 'chill' | 'epic') => {
     if (newVibe === vibe) return
@@ -58,6 +59,12 @@ export function Hero() {
       
       video.addEventListener('canplay', handleCanPlay, { once: true })
       
+      // Update preload video to load the opposite video
+      if (preloadVideoRef.current) {
+        preloadVideoRef.current.src = vibe === 'epic' ? '/bg.mp4' : '/bg_epic.mov'
+        preloadVideoRef.current.load()
+      }
+      
       return () => {
         video.removeEventListener('canplay', handleCanPlay)
       }
@@ -88,6 +95,7 @@ export function Hero() {
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Video */}
+      {/* Visible Background Video */}
       <motion.video
         ref={videoRef}
         autoPlay
@@ -109,6 +117,17 @@ export function Hero() {
       >
         <source src={vibe === 'epic' ? '/bg_epic.mov' : '/bg.mp4'} type="video/mp4" />
       </motion.video>
+
+      {/* Hidden preload video for the inactive vibe */}
+      <video
+        ref={preloadVideoRef}
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className="hidden"
+        src={vibe === 'epic' ? '/bg.mp4' : '/bg_epic.mov'}
+      />
 
       {/* Overlay */}
       <div className={`absolute inset-0 ${vibe === 'epic' ? 'bg-white/20' : 'bg-black/30'}`} />

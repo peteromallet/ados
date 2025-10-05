@@ -173,7 +173,7 @@ export default function EventDetailPage() {
     )
   }
 
-  const isFull = event.max_attendees && event.attendance_count! >= event.max_attendees
+  const isFull = false // TODO: Implement attendance counting
 
   return (
     <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8">
