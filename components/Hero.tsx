@@ -82,7 +82,7 @@ export function Hero() {
       whyGather: (<>Those who appreciate art and the creative process are up against the <strong>slop machine</strong>.{'\n\n'}Open models are an answer - they offer as much control as traditional mediums, unconstrained by invented limitations or constrained imaginations - but they require an ecosystem of effort and support to thrive.{'\n\n'}We gather to celebrate open models & creations, hang out with other art and AI appreciators, and scheme on how to help the open source ecosystem succeed.</>),
     },
     epic: {
-      subtitle: 'A SYMPOSIUM ON THE FUTURE OF ART & CREATIVITY',
+      subtitle: 'A SYMPOSIUM ON THE FUTURE OF CREATIVITY',
       date: 'The City of Angels | November 7th',
       cta: 'I am worthy',
       watchTrailer: 'Feast your eyes',
