@@ -352,7 +352,6 @@ export default function EventDetailPage() {
                         value={inviteCode}
                         onChange={(e) => setInviteCode(e.target.value)}
                         className="mb-4"
-                        autoFocus
                       />
                       <Button
                         type="submit"
