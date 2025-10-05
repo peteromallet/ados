@@ -166,21 +166,21 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center bg-white">
-        <p className="text-xl text-text-light">Loading...</p>
+      <div className="min-h-screen pt-24 flex items-center justify-center bg-white px-4">
+        <p className="text-lg sm:text-xl text-text-light">Loading...</p>
       </div>
     )
   }
 
   if (error || !event) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center bg-white">
+      <div className="min-h-screen pt-24 flex items-center justify-center bg-white px-4">
         <div className="text-center">
-          <p className="text-xl text-red-500 mb-2">
+          <p className="text-lg sm:text-xl text-red-500 mb-2">
             {error || 'Event not found'}
           </p>
-          <p className="text-sm text-gray-500 mb-4">Slug: {params.slug}</p>
-          <Link href="/" className="text-blue-500 hover:underline">
+          <p className="text-xs sm:text-sm text-gray-500 mb-4">Slug: {params.slug}</p>
+          <Link href="/" className="text-sm sm:text-base text-blue-500 hover:underline">
             Return to home
           </Link>
         </div>
@@ -211,20 +211,20 @@ export default function EventDetailPage() {
         {/* Hero Section */}
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center text-white hover:text-gray-200 transition-colors mb-4">
-            <ArrowLeft size={24} />
+            <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
           </Link>
-          <h1 className="text-5xl font-bold text-white mb-4">{event.name}</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">{event.name}</h1>
 
-          <div className="flex flex-wrap gap-4 text-white/80 mb-6">
+          <div className="flex flex-wrap gap-3 sm:gap-4 text-sm sm:text-base text-white/80 mb-6">
             {event.date && (
               <div className="flex items-center space-x-2">
-                <Calendar size={20} />
+                <Calendar size={16} className="sm:w-5 sm:h-5" />
                 <span>{formatDate(event.date)}</span>
               </div>
             )}
             {event.location && (
               <div className="flex items-center space-x-2">
-                <MapPin size={20} />
+                <MapPin size={16} className="sm:w-5 sm:h-5" />
                 <span>{event.location}</span>
               </div>
             )}
@@ -233,37 +233,37 @@ export default function EventDetailPage() {
 
         {/* Status Badge */}
         {hasApplied && (
-          <div className="mb-6 p-4 bg-blue-100/90 backdrop-blur-sm border border-blue-300 rounded-lg">
-            <p className="text-blue-900 font-semibold">
+          <div className="mb-6 p-3 sm:p-4 bg-blue-100/90 backdrop-blur-sm border border-blue-300 rounded-lg">
+            <p className="text-sm sm:text-base text-blue-900 font-semibold">
               ✓ You have already applied to this event
             </p>
           </div>
         )}
 
         {isFull && !hasApplied && (
-          <div className="mb-6 p-4 bg-yellow-100/90 backdrop-blur-sm border border-yellow-300 rounded-lg">
-            <p className="text-yellow-900 font-semibold">
+          <div className="mb-6 p-3 sm:p-4 bg-yellow-100/90 backdrop-blur-sm border border-yellow-300 rounded-lg">
+            <p className="text-sm sm:text-base text-yellow-900 font-semibold">
               This event has reached maximum capacity
             </p>
           </div>
         )}
 
         {/* Description */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-xl p-8 mb-8">
-          <p className="text-text-light text-lg leading-relaxed mb-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-xl p-5 sm:p-8 mb-8">
+          <p className="text-text-light text-base sm:text-lg leading-relaxed mb-4 sm:mb-6">
             Join us in LA.
           </p>
-          <p className="text-text-light text-lg leading-relaxed mb-6">
+          <p className="text-text-light text-base sm:text-lg leading-relaxed mb-4 sm:mb-6">
             The event will consist of:
           </p>
-          <ul className="text-text-light text-lg leading-relaxed mb-6 list-disc pl-6">
+          <ul className="text-text-light text-base sm:text-lg leading-relaxed mb-4 sm:mb-6 list-disc pl-6">
             <li>Day-time: panels, roundtables, hangouts</li>
             <li>Evening: show, drinks, frivolities</li>
           </ul>
-          <p className="text-text-light text-lg leading-relaxed mb-6">
+          <p className="text-text-light text-base sm:text-lg leading-relaxed mb-4 sm:mb-6">
             We have very limited space so we'll ask a few questions to validate if it's a good mutual fit.
           </p>
-          <p className="text-text-light text-lg leading-relaxed">
+          <p className="text-text-light text-base sm:text-lg leading-relaxed">
             For those who wish to travel, we'll have some financial support.
           </p>
         </div>
@@ -285,7 +285,7 @@ export default function EventDetailPage() {
               </Button>
               <button
                 onClick={handleInviteClick}
-                className="text-white/80 hover:text-white transition-colors text-sm underline"
+                className="text-white/80 hover:text-white transition-colors text-xs sm:text-sm underline"
               >
                 I was invited
               </button>
