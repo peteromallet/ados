@@ -295,7 +295,6 @@ export default function EventDetailPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-                onClick={() => setShowInviteModal(false)}
               />
 
               {/* Modal */}
@@ -304,8 +303,12 @@ export default function EventDetailPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -50 }}
                 className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                onClick={() => setShowInviteModal(false)}
               >
-                <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md relative">
+                <div 
+                  className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md relative"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
                     onClick={() => setShowInviteModal(false)}
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
