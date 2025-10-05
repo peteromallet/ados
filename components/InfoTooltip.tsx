@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, ReactNode } from 'react'
+import { useState, ReactNode, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface InfoTooltipProps {
@@ -11,6 +12,51 @@ interface InfoTooltipProps {
 
 export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const mobileTooltip = (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Mobile backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="md:hidden fixed inset-0 bg-black/50 z-[9998]"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Mobile tooltip - explicitly centered */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className={`md:hidden fixed backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line z-[9999] ${
+              isDark
+                ? 'bg-white/95 text-black border border-black/20 shadow-xl'
+                : 'bg-black/95 text-white border border-white/20 shadow-xl'
+            }`}
+            style={{
+              top: '6rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '85vw',
+              maxWidth: '24rem',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {content}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
 
   return (
     <>
@@ -66,44 +112,8 @@ export function InfoTooltip({ trigger, content, isDark = false }: InfoTooltipPro
         </AnimatePresence>
       </div>
 
-      {/* Mobile tooltip and backdrop - rendered at root level */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Mobile backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="md:hidden fixed inset-0 bg-black/50 z-[9998]"
-              onClick={() => setIsOpen(false)}
-            />
-
-            {/* Mobile tooltip - explicitly centered */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
-              className={`md:hidden fixed backdrop-blur-sm p-5 rounded-lg text-sm text-left whitespace-pre-line z-[9999] ${
-                isDark
-                  ? 'bg-white/95 text-black border border-black/20 shadow-xl'
-                  : 'bg-black/95 text-white border border-white/20 shadow-xl'
-              }`}
-              style={{
-                top: '6rem',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '85vw',
-                maxWidth: '24rem',
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {content}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* Mobile tooltip and backdrop - rendered via portal to document.body */}
+      {mounted && createPortal(mobileTooltip, document.body)}
     </>
   )
 }
