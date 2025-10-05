@@ -229,7 +229,7 @@ export function Hero() {
 
       {/* Content */}
       <motion.div 
-        className="relative z-10 text-center px-4 w-full"
+        className="relative z-10 text-center px-6 w-full flex items-center justify-center min-h-screen"
         animate={isGlitching ? {
           scale: [1, 0.95, 1.02, 1],
           rotateZ: rotationDirection === 'right' ? [0, -2, 2, 0] : [0, 2, -2, 0],
@@ -247,31 +247,31 @@ export function Hero() {
           transition={{ duration: 0.8 }}
           className="flex flex-col items-center w-full"
         >
-              <div className="w-full max-w-5xl flex flex-col items-center">
-                <h1 className={`text-8xl md:text-9xl font-black mb-8 uppercase text-center transition-colors duration-300 ${
+              <div className="w-full max-w-5xl flex flex-col items-center px-4">
+                <h1 className={`text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-8 uppercase text-center transition-colors duration-300 ${
                   vibe === 'epic' ? 'text-black' : 'text-white'
                 }`}>
-                  <span className="inline-block tracking-[0.5em] -mr-[0.5em]">ADOS</span>
+                  <span className="inline-block tracking-[0.3em] sm:tracking-[0.5em] -mr-[0.3em] sm:-mr-[0.5em]">ADOS</span>
                 </h1>
                 <motion.p 
                   key={`subtitle-${vibe}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`text-xl md:text-2xl mb-4 font-light uppercase text-center transition-colors duration-300 ${
+                  className={`text-base sm:text-lg md:text-xl lg:text-2xl mb-4 font-light uppercase text-center transition-colors duration-300 px-2 ${
                     vibe === 'epic' ? 'text-black' : 'text-white'
                   }`}
                 >
-                  <span className="inline-block tracking-[0.2em] -mr-[0.2em]">{content[vibe].subtitle}</span>
+                  <span className="inline-block tracking-[0.1em] sm:tracking-[0.2em] -mr-[0.1em] sm:-mr-[0.2em]">{content[vibe].subtitle}</span>
                 </motion.p>
                 <motion.p
                   key={`date-${vibe}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`text-sm md:text-base mb-11 font-light uppercase text-center transition-colors duration-300 ${
+                  className={`text-xs sm:text-sm md:text-base mb-11 font-light uppercase text-center transition-colors duration-300 ${
                     vibe === 'epic' ? 'text-black/70' : 'text-white/70'
                   }`}
                 >
-                  <span className="inline-block tracking-[0.2em] -mr-[0.2em]">{content[vibe].date}</span>
+                  <span className="inline-block tracking-[0.1em] sm:tracking-[0.2em] -mr-[0.1em] sm:-mr-[0.2em]">{content[vibe].date}</span>
                 </motion.p>
               </div>
           <div className="flex flex-col gap-6 items-center">
