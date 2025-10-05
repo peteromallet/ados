@@ -93,7 +93,7 @@ export function Hero() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
       {/* Background Video */}
       {/* Visible Background Video */}
       <motion.video
