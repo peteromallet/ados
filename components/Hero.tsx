@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { VideoModal } from '@/components/VideoModal'
 import { InfoTooltip } from '@/components/InfoTooltip'
@@ -16,6 +17,8 @@ export function Hero() {
   const [rotationDirection, setRotationDirection] = useState<'left' | 'right'>('left')
   const videoRef = useRef<HTMLVideoElement>(null)
   const preloadVideoRef = useRef<HTMLVideoElement>(null)
+  const searchParams = useSearchParams()
+  const inviteUsername = searchParams.get('invite')
 
   const handleVibeChange = (newVibe: 'chill' | 'epic') => {
     if (newVibe === vibe) return
@@ -75,7 +78,7 @@ export function Hero() {
     chill: {
       subtitle: 'A celebration of art and open source AI',
       date: 'Los Angeles | November 7th',
-      cta: "I'd like to join",
+      cta: inviteUsername ? "Accept Invitation" : "I'd like to join",
       watchTrailer: 'Watch the Trailer',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts{'\n'}- Evening: show, drinks, frivolities{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
@@ -84,7 +87,7 @@ export function Hero() {
     epic: {
       subtitle: 'A SYMPOSIUM ON THE FUTURE OF CREATIVITY',
       date: 'The City of Angels | November 7th',
-      cta: 'I am worthy',
+      cta: inviteUsername ? "Accept Invitation" : 'I am worthy',
       watchTrailer: 'Feast your eyes',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts - for hardcore enthusiasts{'\n'}- Evening: show, drinks, frivolities - for curious people{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
@@ -248,6 +251,18 @@ export function Hero() {
           className="flex flex-col items-center w-full"
         >
               <div className="w-full max-w-5xl flex flex-col items-center px-4">
+                {inviteUsername && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className={`text-sm sm:text-base md:text-lg mb-4 font-light uppercase text-center tracking-wider ${
+                      vibe === 'epic' ? 'text-black/70' : 'text-white/70'
+                    }`}
+                  >
+                    An Invitation To {inviteUsername}
+                  </motion.p>
+                )}
                 <h1 className={`text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-8 uppercase text-center transition-colors duration-300 ${
                   vibe === 'epic' ? 'text-black' : 'text-white'
                 }`}>
@@ -293,11 +308,19 @@ export function Hero() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   onClick={() => setIsModalOpen(true)}
-                  className={`flex items-center gap-2 transition-colors text-sm uppercase tracking-wide ${
+                  className={`flex items-center gap-2 transition-colors text-sm uppercase tracking-wide group ${
                     vibe === 'epic' ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-300'
                   }`}
                 >
-                  <Play size={20} />
+                  <motion.div
+                    className="inline-block"
+                    whileHover={{
+                      rotate: [0, -10, 10, -10, 10, 0],
+                      transition: { duration: 0.5 }
+                    }}
+                  >
+                    <Play size={20} />
+                  </motion.div>
                   <span>{content[vibe].watchTrailer}</span>
                 </motion.button>
 
