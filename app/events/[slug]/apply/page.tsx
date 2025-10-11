@@ -38,13 +38,19 @@ export default function ApplyPage() {
           }
         }
         
-        if (inviteCode) {
-          const { data: inviteData, error: inviteError } = await supabase
-            .from('invites')
-            .select('*')
-            .eq('code', inviteCode)
-            .single()
+        // Run auth check and invite check in parallel
+        const [userResult, inviteResult] = await Promise.all([
+          supabase.auth.getUser(),
+          inviteCode 
+            ? supabase.from('invites').select('*').eq('code', inviteCode).single()
+            : Promise.resolve({ data: null, error: null })
+        ])
 
+        const { data: { user } } = userResult
+        
+        // Handle invite validation
+        if (inviteCode) {
+          const { data: inviteData, error: inviteError } = inviteResult
           if (!inviteError && inviteData) {
             // Check if invite has uses left
             if (inviteData.used_count < inviteData.max_uses) {
@@ -67,9 +73,6 @@ export default function ApplyPage() {
             return
           }
         }
-
-        // Check authentication first
-        const { data: { user } } = await supabase.auth.getUser()
         
         if (!user) {
           setShowAuthModal(true)
@@ -79,28 +82,26 @@ export default function ApplyPage() {
 
         setIsAuthenticated(true)
 
-        // Get event data
+        // Get event data with questions in a single query using join
         const { data: eventData, error: eventError } = await supabase
           .from('events')
-          .select('*')
+          .select(`
+            *,
+            questions (*)
+          `)
           .eq('slug', params.slug as string)
+          .order('order_index', { foreignTable: 'questions', ascending: true })
           .single()
 
         if (eventError) throw eventError
 
-        // Get questions
-        const { data: questions, error: questionsError } = await supabase
-          .from('questions')
-          .select('*')
-          .eq('event_id', eventData.id)
-          .order('order_index', { ascending: true })
-
-        if (questionsError) throw questionsError
-
         // Check if user has existing answers and load them
         const { data: existingAttendance } = await supabase
           .from('attendance')
-          .select('id')
+          .select(`
+            id,
+            answers (question_id, answer_text)
+          `)
           .eq('user_id', user.id)
           .eq('event_id', eventData.id)
           .single()
@@ -108,16 +109,10 @@ export default function ApplyPage() {
         if (existingAttendance) {
           setIsUpdating(true)
           
-          // Load existing answers
-          const { data: existingAnswers } = await supabase
-            .from('answers')
-            .select('question_id, answer_text')
-            .eq('attendance_id', existingAttendance.id)
-
           // Pre-populate localStorage with existing answers
-          if (existingAnswers && existingAnswers.length > 0) {
+          if (existingAttendance.answers && existingAttendance.answers.length > 0) {
             const answersMap: Record<string, string> = {}
-            existingAnswers.forEach(answer => {
+            existingAttendance.answers.forEach((answer: any) => {
               answersMap[answer.question_id] = answer.answer_text
             })
             
@@ -127,7 +122,7 @@ export default function ApplyPage() {
           }
         }
         
-        setEvent({ ...eventData, questions: questions || [] })
+        setEvent(eventData as EventWithDetails)
       } catch (err) {
         console.error('Error loading event:', err)
         setError('Failed to load event')
