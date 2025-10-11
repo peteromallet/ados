@@ -4,6 +4,9 @@ import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
+// Log environment at build time
+console.log('🔧 Layout - NEXT_PUBLIC_APP_URL at build/load:', process.env.NEXT_PUBLIC_APP_URL)
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: 'ADOS - Los Angeles | November 7th',

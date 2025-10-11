@@ -8,6 +8,9 @@ export async function GET(request: Request) {
   
   // Use the app URL from env or fall back to request origin
   const origin = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin
+  console.log('🔧 Auth Callback - NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL)
+  console.log('🔧 Auth Callback - Request origin:', requestUrl.origin)
+  console.log('🔧 Auth Callback - Using origin:', origin)
 
   if (code) {
     const supabase = await createClient()

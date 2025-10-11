@@ -55,10 +55,16 @@ export function AuthModal({ isOpen, onClose, redirectTo }: AuthModalProps) {
     setError(null)
     try {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      const redirectUrl = `${appUrl}/auth/callback${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`
+      console.log('🔧 Magic Link - NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL)
+      console.log('🔧 Magic Link - window.location.origin:', window.location.origin)
+      console.log('🔧 Magic Link - Using appUrl:', appUrl)
+      console.log('🔧 Magic Link - Full redirect URL:', redirectUrl)
+      
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${appUrl}/auth/callback${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`,
+          emailRedirectTo: redirectUrl,
         },
       })
       
