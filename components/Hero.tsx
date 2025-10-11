@@ -234,7 +234,7 @@ export function Hero() {
         playsInline
         preload="auto"
         className="hidden"
-        src={vibe === 'epic' ? '/background-hero.mp4' : '/epic-showcase.mp4'}
+        src={vibe === 'epic' ? '/chill-hero.mp4' : '/epic-hero.mp4'}
       />
 
       {/* Overlay */}
