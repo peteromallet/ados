@@ -88,37 +88,6 @@ export default function EventDetailPage() {
     }
   }, [event, params.slug, router])
 
-  // Check for pending invite code after auth
-  useEffect(() => {
-    const processInvite = async () => {
-      const pendingCode = sessionStorage.getItem('pendingInviteCode')
-      if (pendingCode && isAuthenticated && event) {
-        sessionStorage.removeItem('pendingInviteCode')
-        
-        // Create attendance directly with the pending code
-        try {
-          const { data: { user } } = await supabase.auth.getUser()
-          if (!user) return
-
-          const { error: attendanceError } = await supabase
-            .from('attendance')
-            .insert({
-              user_id: user.id,
-              event_id: event.id,
-              status: 'approved',
-            })
-
-          if (attendanceError) throw attendanceError
-
-          router.push(`/events/${params.slug}?success=true`)
-        } catch (error) {
-          console.error('Error creating attendance:', error)
-        }
-      }
-    }
-    
-    processInvite()
-  }, [isAuthenticated, event, supabase, router])
 
   const handleApplyClick = () => {
     if (isAuthenticated) {
@@ -140,44 +109,34 @@ export default function EventDetailPage() {
       return
     }
 
-    // Validate invite code
-    if (inviteCode.toLowerCase().trim() !== 'goodiewoodie') {
-      setInviteError('Invalid invite code')
-      return
-    }
-
-    // Check if authenticated
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      // If not authenticated, show auth modal first
-      setShowInviteModal(false)
-      setShowAuthModal(true)
-      // Store the invite code to use after auth
-      sessionStorage.setItem('pendingInviteCode', inviteCode)
-      return
-    }
-
-    // User is authenticated and code is valid - create attendance directly
     setIsSubmittingInvite(true)
-    
+
     try {
-      const { data: attendance, error: attendanceError } = await supabase
-        .from('attendance')
-        .insert({
-          user_id: user.id,
-          event_id: event!.id,
-          status: 'approved', // Auto-approve invited guests
-        })
-        .select()
+      // Validate invite code against database
+      const { data: inviteData, error: inviteError } = await supabase
+        .from('invites')
+        .select('*')
+        .eq('code', inviteCode.trim().toUpperCase())
         .single()
 
-      if (attendanceError) throw attendanceError
+      if (inviteError || !inviteData) {
+        setInviteError('Invalid invite code')
+        setIsSubmittingInvite(false)
+        return
+      }
 
-      // Success! Redirect back to event page with success message
-      router.push(`/events/${params.slug}?success=true`)
+      // Check if invite has uses left
+      if (inviteData.used_count >= inviteData.max_uses) {
+        setInviteError('This invite code has been used up')
+        setIsSubmittingInvite(false)
+        return
+      }
+
+      // Close modal and redirect to apply page with invite code
+      setShowInviteModal(false)
+      router.push(`/events/${params.slug}/apply?invite=${inviteCode.trim().toUpperCase()}`)
     } catch (error) {
-      console.error('Error creating attendance:', error)
+      console.error('Error validating invite:', error)
       setInviteError('Failed to process invite. Please try again.')
       setIsSubmittingInvite(false)
     }
