@@ -29,42 +29,6 @@ export default function EventDetailPage() {
   const [isSubmittingInvite, setIsSubmittingInvite] = useState(false)
   const showSuccess = searchParams.get('success') === 'true'
 
-  // Prefetch apply page data in the background
-  const prefetchApplyData = async () => {
-    if (!event) return
-    
-    try {
-      // Always prefetch event with questions (no auth required)
-      supabase
-        .from('events')
-        .select(`
-          *,
-          questions (*)
-        `)
-        .eq('slug', params.slug as string)
-        .order('order_index', { foreignTable: 'questions', ascending: true })
-        .single()
-        .then(() => console.log('✅ Prefetched apply page data'))
-
-      // Only prefetch user-specific data if authenticated
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user && event) {
-        supabase
-          .from('attendance')
-          .select(`
-            id,
-            answers (question_id, answer_text)
-          `)
-          .eq('user_id', user.id)
-          .eq('event_id', event.id)
-          .single()
-          .then(() => console.log('✅ Prefetched user answers'))
-      }
-    } catch (err) {
-      // Silent fail - this is just optimization
-      console.log('Prefetch skipped:', err)
-    }
-  }
 
   useEffect(() => {
     async function loadEvent() {
@@ -108,20 +72,12 @@ export default function EventDetailPage() {
     loadEvent()
   }, [params.slug, supabase])
 
-  // Prefetch apply page data after event loads
+  // Prefetch apply page route after event loads (JS bundles only, not data)
   useEffect(() => {
     if (event) {
-      // Prefetch the route
       router.prefetch(`/events/${params.slug}/apply`)
-      
-      // Prefetch data in background after a short delay (to not block main thread)
-      const timer = setTimeout(() => {
-        prefetchApplyData()
-      }, 500)
-      
-      return () => clearTimeout(timer)
     }
-  }, [event])
+  }, [event, params.slug, router])
 
   // Check for pending invite code after auth
   useEffect(() => {
@@ -345,10 +301,7 @@ export default function EventDetailPage() {
               <Button 
                 size="lg" 
                 onClick={handleApplyClick}
-                onMouseEnter={() => {
-                  router.prefetch(`/events/${params.slug}/apply`)
-                  prefetchApplyData()
-                }}
+                onMouseEnter={() => router.prefetch(`/events/${params.slug}/apply`)}
               >
                 Sign up
               </Button>

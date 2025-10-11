@@ -168,7 +168,11 @@ export function Hero() {
   }
 
   const getCtaLink = () => {
-    return '/events/ados-2025'
+    // "Check status" and "We're excited" go to event page, others to apply
+    if (applicationStatus === 'pending' || applicationStatus === 'approved') {
+      return '/events/ados-2025'
+    }
+    return '/events/ados-2025/apply'
   }
 
   const content = {
@@ -453,8 +457,9 @@ export function Hero() {
             <Link 
               href={inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : getCtaLink()}
               onMouseEnter={() => {
-                // Prefetch the event detail page
-                router.prefetch('/events/ados-2025')
+                // Prefetch whichever page the CTA points to
+                const link = inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : getCtaLink()
+                router.prefetch(link)
               }}
             >
               <motion.div
