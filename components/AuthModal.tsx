@@ -26,10 +26,11 @@ export function AuthModal({ isOpen, onClose, redirectTo }: AuthModalProps) {
     setIsLoading(true)
     setError(null)
     try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'discord',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`,
+          redirectTo: `${appUrl}/auth/callback${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`,
         },
       })
       
@@ -53,10 +54,11 @@ export function AuthModal({ isOpen, onClose, redirectTo }: AuthModalProps) {
     setIsLoading(true)
     setError(null)
     try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`,
+          emailRedirectTo: `${appUrl}/auth/callback${redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`,
         },
       })
       

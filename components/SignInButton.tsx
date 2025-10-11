@@ -11,7 +11,7 @@ export function SignInButton({ redirectTo }: SignInButtonProps) {
   const supabase = createClient()
 
   const handleSignIn = async () => {
-    const origin = window.location.origin
+    const origin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
     const redirect = redirectTo || '/events'
     
     await supabase.auth.signInWithOAuth({
