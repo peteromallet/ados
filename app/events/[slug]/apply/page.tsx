@@ -232,39 +232,41 @@ export default function ApplyPage() {
         redirectTo={`/events/${params.slug}/apply`}
       />
       
-      {loading && !showAuthModal && (
-        <div className="min-h-screen pt-24 flex items-center justify-center">
-          <p className="text-xl text-text-light">Loading...</p>
-        </div>
-      )}
+      <div className="relative min-h-screen overflow-hidden">
+        {/* Video Background - always show */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute top-0 left-0 w-full h-full object-cover"
+        >
+          <source src="/chill-hero.mp4" type="video/mp4" />
+        </video>
+        
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/40" />
 
-      {!loading && !showAuthModal && error && (
-        <div className="min-h-screen pt-24 flex items-center justify-center">
-          <p className="text-xl text-red-500">{error}</p>
-        </div>
-      )}
+        {loading && !showAuthModal && (
+          <div className="relative z-10 min-h-screen pt-24 flex items-center justify-center">
+            <p className="text-xl text-white">Loading...</p>
+          </div>
+        )}
 
-      {!loading && !showAuthModal && !error && event && !event.questions?.length && (
-        <div className="min-h-screen pt-24 flex items-center justify-center">
-          <p className="text-xl text-text-light">No questions configured for this event</p>
-        </div>
-      )}
-      
-      {!loading && !showAuthModal && isAuthenticated && event && event.questions && event.questions.length > 0 && (
-        <div className="relative min-h-screen overflow-hidden">
-          {/* Video Background */}
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute top-0 left-0 w-full h-full object-cover"
-          >
-            <source src="/chill-hero.mp4" type="video/mp4" />
-          </video>
-          
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/40" />
+        {!loading && !showAuthModal && error && (
+          <div className="relative z-10 min-h-screen pt-24 flex items-center justify-center">
+            <p className="text-xl text-red-500">{error}</p>
+          </div>
+        )}
+
+        {!loading && !showAuthModal && !error && event && !event.questions?.length && (
+          <div className="relative z-10 min-h-screen pt-24 flex items-center justify-center">
+            <p className="text-xl text-white">No questions configured for this event</p>
+          </div>
+        )}
+        
+        {!loading && !showAuthModal && isAuthenticated && event && event.questions && event.questions.length > 0 && (
+          <>
           
           {/* Content */}
           <div className="relative z-10 pt-8 sm:pt-16 md:pt-24">
@@ -285,8 +287,9 @@ export default function ApplyPage() {
               inviteName={invite?.name}
             />
           </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </>
   )
 }
