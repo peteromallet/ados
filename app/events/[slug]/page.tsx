@@ -34,10 +34,7 @@ export default function EventDetailPage() {
     if (!event) return
     
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      // Prefetch event with questions
+      // Always prefetch event with questions (no auth required)
       supabase
         .from('events')
         .select(`
@@ -49,16 +46,20 @@ export default function EventDetailPage() {
         .single()
         .then(() => console.log('✅ Prefetched apply page data'))
 
-      // Prefetch existing attendance/answers if they exist
-      supabase
-        .from('attendance')
-        .select(`
-          id,
-          answers (question_id, answer_text)
-        `)
-        .eq('user_id', user.id)
-        .eq('event_id', event.id)
-        .single()
+      // Only prefetch user-specific data if authenticated
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user && event) {
+        supabase
+          .from('attendance')
+          .select(`
+            id,
+            answers (question_id, answer_text)
+          `)
+          .eq('user_id', user.id)
+          .eq('event_id', event.id)
+          .single()
+          .then(() => console.log('✅ Prefetched user answers'))
+      }
     } catch (err) {
       // Silent fail - this is just optimization
       console.log('Prefetch skipped:', err)
@@ -109,7 +110,7 @@ export default function EventDetailPage() {
 
   // Prefetch apply page data after event loads
   useEffect(() => {
-    if (event && isAuthenticated) {
+    if (event) {
       // Prefetch the route
       router.prefetch(`/events/${params.slug}/apply`)
       
@@ -120,7 +121,7 @@ export default function EventDetailPage() {
       
       return () => clearTimeout(timer)
     }
-  }, [event, isAuthenticated])
+  }, [event])
 
   // Check for pending invite code after auth
   useEffect(() => {
