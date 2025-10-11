@@ -350,7 +350,7 @@ export default function EventDetailPage() {
                   prefetchApplyData()
                 }}
               >
-                Proceed to questions
+                Sign up
               </Button>
               <button
                 onClick={handleInviteClick}
