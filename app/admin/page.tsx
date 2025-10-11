@@ -95,7 +95,7 @@ export default function AdminPage() {
     }
   }
 
-  const updateAttendeeStatus = async (attendanceId: string, newStatus: 'approved' | 'rejected') => {
+  const updateAttendeeStatus = async (attendanceId: string, newStatus: 'approved' | 'rejected' | 'pending') => {
     setUpdatingStatus(attendanceId)
     
     try {
