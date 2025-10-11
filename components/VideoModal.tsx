@@ -54,11 +54,11 @@ export function VideoModal({ isOpen, onClose, videoSrc }: VideoModalProps) {
       </button>
       
       <div 
-        className="relative w-full max-w-5xl aspect-video"
+        className="relative max-w-5xl max-h-[90vh] flex items-center justify-center"
         onClick={(e) => e.stopPropagation()}
       >
         <video
-          className="w-full h-full"
+          className="max-w-full max-h-[90vh] w-auto h-auto"
           controls
           autoPlay
           src={videoSrc}

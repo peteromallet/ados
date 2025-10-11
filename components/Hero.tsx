@@ -9,6 +9,7 @@ import { InfoTooltip } from '@/components/InfoTooltip'
 import { VibeToggle } from '@/components/VibeToggle'
 import { motion } from 'framer-motion'
 import { Play } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export function Hero() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -18,7 +19,8 @@ export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const preloadVideoRef = useRef<HTMLVideoElement>(null)
   const searchParams = useSearchParams()
-  const inviteUsername = searchParams.get('invite')
+  const [inviteName, setInviteName] = useState<string | null>(null)
+  const supabase = createClient()
 
   const handleVibeChange = (newVibe: 'chill' | 'epic') => {
     if (newVibe === vibe) return
@@ -42,6 +44,25 @@ export function Hero() {
     }, 600) // End glitch
   }
 
+  // Fetch invite name from database
+  useEffect(() => {
+    const inviteCode = searchParams.get('invite')
+    if (inviteCode) {
+      async function fetchInvite() {
+        const { data, error } = await supabase
+          .from('invites')
+          .select('name')
+          .eq('code', inviteCode)
+          .single()
+        
+        if (!error && data) {
+          setInviteName(data.name)
+        }
+      }
+      fetchInvite()
+    }
+  }, [searchParams, supabase])
+
   // Update video source when vibe changes
   useEffect(() => {
     if (videoRef.current) {
@@ -49,8 +70,8 @@ export function Hero() {
       const currentTime = video.currentTime
       const wasPlaying = !video.paused
       
-      video.poster = vibe === 'epic' ? '/bg_epic_poster.jpg' : '/bg_poster.jpg'
-      video.src = vibe === 'epic' ? '/bg_epic.mov' : '/bg.mp4'
+      video.poster = vibe === 'epic' ? '/epic-showcase-poster.jpg' : '/background-hero-poster.jpg'
+      video.src = vibe === 'epic' ? '/epic-showcase.mp4' : '/background-hero.mp4'
       video.load()
       
       const handleCanPlay = () => {
@@ -64,7 +85,7 @@ export function Hero() {
       
       // Update preload video to load the opposite video
       if (preloadVideoRef.current) {
-        preloadVideoRef.current.src = vibe === 'epic' ? '/bg.mp4' : '/bg_epic.mov'
+        preloadVideoRef.current.src = vibe === 'epic' ? '/background-hero.mp4' : '/epic-showcase.mp4'
         preloadVideoRef.current.load()
       }
       
@@ -78,7 +99,7 @@ export function Hero() {
     chill: {
       subtitle: 'A celebration of art and open source AI',
       date: 'Los Angeles | November 7th',
-      cta: inviteUsername ? "Accept Invitation" : "I'd like to join",
+      cta: inviteName ? "Accept Invitation" : "I'd like to join",
       watchTrailer: 'Watch the Trailer',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts{'\n'}- Evening: show, drinks, frivolities{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
@@ -87,7 +108,7 @@ export function Hero() {
     epic: {
       subtitle: 'A SYMPOSIUM ON THE FUTURE OF CREATIVITY',
       date: 'The City of Angels | November 7th',
-      cta: inviteUsername ? "Accept Invitation" : 'I am worthy',
+      cta: inviteName ? "Accept Invitation" : 'I am worthy',
       watchTrailer: 'Feast your eyes',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts - for hardcore enthusiasts{'\n'}- Evening: show, drinks, frivolities - for curious people{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
@@ -118,7 +139,7 @@ export function Hero() {
           filter: isGlitching ? `blur(8px) saturate(2) hue-rotate(${rotationDirection === 'right' ? 30 : -30}deg)` : 'none',
         }}
       >
-        <source src={vibe === 'epic' ? '/bg_epic.mov' : '/bg.mp4'} type="video/mp4" />
+        <source src={vibe === 'epic' ? '/epic-showcase.mp4' : '/background-hero.mp4'} type="video/mp4" />
       </motion.video>
 
       {/* Hidden preload video for the inactive vibe */}
@@ -129,7 +150,7 @@ export function Hero() {
         playsInline
         preload="auto"
         className="hidden"
-        src={vibe === 'epic' ? '/bg.mp4' : '/bg_epic.mov'}
+        src={vibe === 'epic' ? '/background-hero.mp4' : '/epic-showcase.mp4'}
       />
 
       {/* Overlay */}
@@ -251,7 +272,7 @@ export function Hero() {
           className="flex flex-col items-center w-full"
         >
               <div className="w-full max-w-5xl flex flex-col items-center px-4">
-                {inviteUsername && (
+                {inviteName && (
                   <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -260,7 +281,7 @@ export function Hero() {
                       vibe === 'epic' ? 'text-black/70' : 'text-white/70'
                     }`}
                   >
-                    An Invitation To {inviteUsername}
+                    An Invitation To {inviteName}
                   </motion.p>
                 )}
                 <h1 className={`text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-8 uppercase text-center transition-colors duration-300 ${
@@ -290,7 +311,7 @@ export function Hero() {
                 </motion.p>
               </div>
           <div className="flex flex-col gap-6 items-center">
-            <Link href="/events/ados-2025">
+            <Link href={inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : "/events/ados-2025"}>
               <motion.div
                 key={`cta-${vibe}`}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -358,7 +379,7 @@ export function Hero() {
       <VideoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        videoSrc={vibe === 'epic' ? '/bg_epic.mov' : '/bg.mp4'}
+        videoSrc={vibe === 'epic' ? '/epic-showcase-full.mp4' : '/background-hero-full.mp4'}
       />
     </div>
   )

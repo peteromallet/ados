@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "db:migrate": "node run-migrations.js",
+    "db:migrate:now": "node run-migrations-now.js"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
@@ -31,4 +33,3 @@
     "node": ">=18.0.0"
   }
 }
-

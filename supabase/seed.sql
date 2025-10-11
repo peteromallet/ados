@@ -75,23 +75,23 @@ BEGIN
   SELECT id INTO event_meetup_id FROM events WHERE slug = 'ai-art-showcase';
 
   -- Insert questions for ADOS 2025
-  INSERT INTO questions (event_id, question_text, question_type, order_index, is_required)
+  INSERT INTO questions (event_id, question_text, question_type, order_index, is_required, placeholder, helper_text)
   VALUES 
-    (event_ados_id, 'Who are you? (link, writing, bio)', 'textarea', 1, true),
-    (event_ados_id, 'Why would you like to join?', 'textarea', 2, true),
-    (event_ados_id, 'Which would you like to attend?', 'multiple_select', 3, true),
-    (event_ados_id, 'Do you need travel support?', 'multiple_choice', 4, true),
-    (event_ados_id, 'Where will you travel from?', 'text', 5, false);
+    (event_ados_id, 'Who are you? (link, writing, bio)', 'textarea', 1, true, NULL, 'If we don''t already know you! And why you''d like to join if it''s not obvious.'),
+    (event_ados_id, 'Which would you like to attend?', 'multiple_choice', 2, true, NULL, NULL),
+    (event_ados_id, 'Is there anything you''d like to contribute as part of the event?', 'textarea', 3, false, 'Host a roundtable, show something you made, etc.', 'Please share specifics, we''ll be in touch if it''s a good fit.'),
+    (event_ados_id, 'Do you need travel support?', 'multiple_choice', 4, true, NULL, 'We have limited travel support and will prioritise open source contributors who are most in-need.'),
+    (event_ados_id, 'Where will you travel from?', 'text', 5, false, NULL, NULL);
 
-  -- Update the multiple select question with options
+  -- Update the attendance question with options
   UPDATE questions 
-  SET options = '["Day-time: panels, roundtables, hangouts", "Evening: show, drinks, frivolities"]'::jsonb
-  WHERE event_id = event_ados_id AND question_type = 'multiple_select';
+  SET options = '["Day-time: panels, roundtables, hangouts", "Evening: show, drinks, frivolities", "Both"]'::jsonb
+  WHERE event_id = event_ados_id AND question_text = 'Which would you like to attend?';
 
-  -- Update the multiple choice question with options
+  -- Update the travel support question with options
   UPDATE questions 
   SET options = '["No", "Yes, I won''t be able to make it without", "It''d be nice but I can make it without it"]'::jsonb
-  WHERE event_id = event_ados_id AND question_type = 'multiple_choice';
+  WHERE event_id = event_ados_id AND question_text = 'Do you need travel support?';
 
   -- Insert questions for ComfyUI Masterclass
   INSERT INTO questions (event_id, question_text, question_type, order_index, is_required)

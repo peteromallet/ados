@@ -89,6 +89,8 @@ export interface Database {
           options: any | null
           is_required: boolean
           order_index: number
+          placeholder: string | null
+          helper_text: string | null
           created_at: string
         }
         Insert: {
@@ -99,6 +101,8 @@ export interface Database {
           options?: any | null
           is_required?: boolean
           order_index: number
+          placeholder?: string | null
+          helper_text?: string | null
           created_at?: string
         }
         Update: {
@@ -109,6 +113,8 @@ export interface Database {
           options?: any | null
           is_required?: boolean
           order_index?: number
+          placeholder?: string | null
+          helper_text?: string | null
           created_at?: string
         }
       }
@@ -122,6 +128,7 @@ export interface Database {
           reviewed_at: string | null
           reviewed_by: string | null
           notes: string | null
+          invite_code: string | null
         }
         Insert: {
           id?: string
@@ -132,6 +139,7 @@ export interface Database {
           reviewed_at?: string | null
           reviewed_by?: string | null
           notes?: string | null
+          invite_code?: string | null
         }
         Update: {
           id?: string
@@ -142,6 +150,7 @@ export interface Database {
           reviewed_at?: string | null
           reviewed_by?: string | null
           notes?: string | null
+          invite_code?: string | null
         }
       }
       answers: {
@@ -167,6 +176,35 @@ export interface Database {
           created_at?: string
         }
       }
+      invites: {
+        Row: {
+          id: string
+          code: string
+          name: string
+          max_uses: number
+          used_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          name: string
+          max_uses?: number
+          used_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          name?: string
+          max_uses?: number
+          used_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -176,6 +214,7 @@ export type Event = Database['public']['Tables']['events']['Row']
 export type Question = Database['public']['Tables']['questions']['Row']
 export type Attendance = Database['public']['Tables']['attendance']['Row']
 export type Answer = Database['public']['Tables']['answers']['Row']
+export type Invite = Database['public']['Tables']['invites']['Row']
 
 export interface QuestionWithAnswer extends Question {
   answer?: string

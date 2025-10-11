@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
@@ -15,6 +15,7 @@ import type { Event } from '@/lib/types'
 export default function EventDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(true)
@@ -26,6 +27,7 @@ export default function EventDetailPage() {
   const [inviteCode, setInviteCode] = useState('')
   const [inviteError, setInviteError] = useState('')
   const [isSubmittingInvite, setIsSubmittingInvite] = useState(false)
+  const showSuccess = searchParams.get('success') === 'true'
 
   useEffect(() => {
     async function loadEvent() {
@@ -91,7 +93,7 @@ export default function EventDetailPage() {
 
           if (attendanceError) throw attendanceError
 
-          router.push('/success')
+          router.push(`/events/${params.slug}?success=true`)
         } catch (error) {
           console.error('Error creating attendance:', error)
         }
@@ -155,8 +157,8 @@ export default function EventDetailPage() {
 
       if (attendanceError) throw attendanceError
 
-      // Success! Redirect to success page
-      router.push('/success')
+      // Success! Redirect back to event page with success message
+      router.push(`/events/${params.slug}?success=true`)
     } catch (error) {
       console.error('Error creating attendance:', error)
       setInviteError('Failed to process invite. Please try again.')
@@ -198,10 +200,10 @@ export default function EventDetailPage() {
         loop
         muted
         playsInline
-        poster="/bg_poster.jpg"
+        poster="/background-hero-poster.jpg"
         className="fixed inset-0 w-full h-full object-cover -z-10"
       >
-        <source src="/bg.mp4" type="video/mp4" />
+        <source src="/background-hero.mp4" type="video/mp4" />
       </video>
 
       {/* Overlay */}
@@ -235,10 +237,18 @@ export default function EventDetailPage() {
         </div>
 
         {/* Status Badge */}
-        {hasApplied && (
+        {showSuccess && (
+          <div className="mb-6 p-3 sm:p-4 bg-green-100/90 backdrop-blur-sm border border-green-300 rounded-lg">
+            <p className="text-sm sm:text-base text-green-900 font-semibold">
+              ✓ You have successfully submitted for this event
+            </p>
+          </div>
+        )}
+        
+        {hasApplied && !showSuccess && (
           <div className="mb-6 p-3 sm:p-4 bg-blue-100/90 backdrop-blur-sm border border-blue-300 rounded-lg">
             <p className="text-sm sm:text-base text-blue-900 font-semibold">
-              ✓ You have already applied to this event
+              ✓ You have already submitted for this event
             </p>
           </div>
         )}
@@ -274,8 +284,8 @@ export default function EventDetailPage() {
         {/* CTA */}
         <div className="flex flex-col items-center gap-4">
           {hasApplied ? (
-            <Link href="/dashboard">
-              <Button size="lg">View My Applications</Button>
+            <Link href={`/events/${params.slug}/apply`}>
+              <Button size="lg">Update Submission</Button>
             </Link>
           ) : isFull ? (
             <Button size="lg" disabled>

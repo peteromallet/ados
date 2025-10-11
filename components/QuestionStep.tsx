@@ -17,6 +17,9 @@ export function QuestionStep({ question, value, onChange, error }: QuestionStepP
         <h2 className="text-3xl font-bold text-text-dark mb-2">
           {question.question_text}
         </h2>
+        {question.helper_text && (
+          <p className="text-sm text-gray-600 mb-2">{question.helper_text}</p>
+        )}
         {question.is_required && (
           <span className="text-sm text-red-500">* Required</span>
         )}
@@ -28,12 +31,12 @@ export function QuestionStep({ question, value, onChange, error }: QuestionStepP
           onChange={(e) => onChange(e.target.value)}
           error={error}
           rows={6}
-          placeholder="Type your answer here..."
+          placeholder={question.placeholder || "Type your answer here..."}
           className="text-lg"
         />
       ) : question.question_type === 'multiple_select' && question.options ? (
         <div className="space-y-3">
-          {(question.options as string[]).map((option) => {
+          {(Array.isArray(question.options) ? question.options : []).map((option) => {
             const selectedValues = value ? value.split(',') : []
             const isChecked = selectedValues.includes(option)
             
@@ -50,15 +53,15 @@ export function QuestionStep({ question, value, onChange, error }: QuestionStepP
             return (
               <label
                 key={option}
-                className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-primary transition-colors"
+                className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-primary transition-colors bg-white"
               >
                 <input
                   type="checkbox"
                   checked={isChecked}
                   onChange={(e) => handleCheckboxChange(e.target.checked)}
-                  className="w-5 h-5 text-primary rounded"
+                  className="w-5 h-5 accent-blue-600 cursor-pointer flex-shrink-0"
                 />
-                <span className="text-lg">{option}</span>
+                <span className="text-lg text-gray-900">{option}</span>
               </label>
             )
           })}
@@ -66,10 +69,10 @@ export function QuestionStep({ question, value, onChange, error }: QuestionStepP
         </div>
       ) : question.question_type === 'multiple_choice' && question.options ? (
         <div className="space-y-3">
-          {(question.options as string[]).map((option) => (
+          {(Array.isArray(question.options) ? question.options : []).map((option) => (
             <label
               key={option}
-              className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-primary transition-colors"
+              className="flex items-center space-x-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-primary transition-colors bg-white"
             >
               <input
                 type="radio"
@@ -77,9 +80,9 @@ export function QuestionStep({ question, value, onChange, error }: QuestionStepP
                 value={option}
                 checked={value === option}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-5 h-5 text-primary"
+                className="w-5 h-5 accent-blue-600 cursor-pointer flex-shrink-0"
               />
-              <span className="text-lg">{option}</span>
+              <span className="text-lg text-gray-900">{option}</span>
             </label>
           ))}
           {error && <p className="text-sm text-red-500">{error}</p>}
@@ -89,7 +92,7 @@ export function QuestionStep({ question, value, onChange, error }: QuestionStepP
           value={value}
           onChange={(e) => onChange(e.target.value)}
           error={error}
-          placeholder="Type your answer here..."
+          placeholder={question.placeholder || "Type your answer here..."}
           className="text-lg"
         />
       )}

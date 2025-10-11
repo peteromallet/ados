@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Question } from '@/lib/types'
 import { QuestionStep } from './QuestionStep'
 import { ProgressBar } from './ui/ProgressBar'
@@ -10,19 +10,65 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 interface QuestionnaireProps {
   questions: Question[]
   onSubmit: (answers: { question_id: string; answer_text: string }[]) => Promise<void>
+  isUpdating?: boolean
+  inviteName?: string
 }
 
-export function Questionnaire({ questions, onSubmit }: QuestionnaireProps) {
+export function Questionnaire({ questions, onSubmit, isUpdating = false, inviteName }: QuestionnaireProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  // Generate a unique storage key based on first question ID (event-specific)
+  const storageKey = questions.length > 0 ? `questionnaire_${questions[0].event_id}` : null
+
+  // Load saved answers on mount
+  useEffect(() => {
+    if (!storageKey) return
+    
+    try {
+      const saved = localStorage.getItem(storageKey)
+      if (saved) {
+        const parsedAnswers = JSON.parse(saved)
+        setAnswers(parsedAnswers)
+        
+        // If updating and has saved answers, jump to summary
+        if (isUpdating && Object.keys(parsedAnswers).length > 0) {
+          setShowSummary(true)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load saved answers:', error)
+    } finally {
+      setIsLoaded(true)
+    }
+  }, [storageKey, isUpdating])
+
+  // Auto-save answers whenever they change
+  useEffect(() => {
+    if (!storageKey || !isLoaded) return
+    
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(answers))
+    } catch (error) {
+      console.error('Failed to save answers:', error)
+    }
+  }, [answers, storageKey, isLoaded])
 
   // Filter questions based on conditional logic
   const getVisibleQuestions = () => {
     const visible: Question[] = []
-    for (const question of questions) {
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i]
+      
+      // Skip first question if user came via invite
+      if (i === 0 && inviteName) {
+        continue
+      }
+      
       // Check if this is the conditional travel location question
       if (question.question_text.toLowerCase().includes('where will you travel from')) {
         // Only show if they need travel support
@@ -79,6 +125,11 @@ export function Questionnaire({ questions, onSubmit }: QuestionnaireProps) {
 
     try {
       await onSubmit(formattedAnswers)
+      
+      // Clear saved answers after successful submission
+      if (storageKey) {
+        localStorage.removeItem(storageKey)
+      }
     } catch (error) {
       console.error('Error submitting answers:', error)
       alert('There was an error submitting your application. Please try again.')
@@ -97,6 +148,17 @@ export function Questionnaire({ questions, onSubmit }: QuestionnaireProps) {
     if (errors[currentQuestion.id]) {
       setErrors({ ...errors, [currentQuestion.id]: '' })
     }
+  }
+
+  // Don't render until loaded to prevent flash
+  if (!isLoaded) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-4">
+        <div className="bg-white rounded-lg shadow-lg p-8 min-h-[400px] flex items-center justify-center">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   if (showSummary) {
@@ -137,7 +199,7 @@ export function Questionnaire({ questions, onSubmit }: QuestionnaireProps) {
               disabled={isSubmitting}
               size="lg"
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Application'}
+              {isSubmitting ? (isUpdating ? 'Updating...' : 'Submitting...') : (isUpdating ? 'Update' : 'Submit')}
             </Button>
           </div>
         </div>
@@ -146,11 +208,20 @@ export function Questionnaire({ questions, onSubmit }: QuestionnaireProps) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="max-w-3xl mx-auto px-4 py-4">
+      {inviteName && (
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6 border-2 border-blue-500">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Accept Invitation</h3>
+          <p className="text-gray-700">
+            You've been invited by <span className="font-semibold text-blue-600">{inviteName}</span>
+          </p>
+        </div>
+      )}
+      
       <ProgressBar
         current={currentStep + 1}
         total={visibleQuestions.length}
-        className="mb-12"
+        className="mb-8"
       />
 
       <div className="bg-white rounded-lg shadow-lg p-8 min-h-[400px]">

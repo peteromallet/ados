@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADOS - Magic Link</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%;">
+                    <!-- Main Content Card -->
+                    <tr>
+                        <td style="background-image: url('https://ados.events/bg_poster.jpg'); background-size: cover; background-position: center; border-radius: 16px; overflow: hidden; position: relative;">
+                            <!-- Dark overlay -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); padding: 60px 40px; text-align: center;">
+                                        <!-- Logo/Title -->
+                                        <h1 style="color: #ffffff; font-size: 72px; font-weight: 900; letter-spacing: 0.3em; margin: 0 0 20px 0; text-transform: uppercase;">
+                                            ADOS
+                                        </h1>
+                                        
+                                        <!-- Subtitle -->
+                                        <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase; margin: 0 0 40px 0;">
+                                            A celebration of art and open source AI
+                                        </p>
+                                        
+                                        <!-- Divider -->
+                                        <div style="width: 60px; height: 2px; background: rgba(255, 255, 255, 0.3); margin: 0 auto 40px auto;"></div>
+                                        
+                                        <!-- Message -->
+                                        <h2 style="color: #ffffff; font-size: 24px; font-weight: 600; margin: 0 0 16px 0;">
+                                            Your Magic Link
+                                        </h2>
+                                        
+                                        <p style="color: rgba(255, 255, 255, 0.9); font-size: 16px; line-height: 1.6; margin: 0 0 32px 0;">
+                                            Click the button below to securely sign in and complete your submission.
+                                        </p>
+                                        
+                                        <!-- CTA Button -->
+                                        <table cellpadding="0" cellspacing="0" border="0" align="center">
+                                            <tr>
+                                                <td align="center" style="border-radius: 8px; background: #ffffff;">
+                                                    <a href="{{ .ConfirmationURL }}" target="_blank" style="display: inline-block; padding: 16px 48px; color: #000000; font-size: 16px; font-weight: 600; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em;">
+                                                        Sign In to ADOS
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Link fallback -->
+                                        <p style="color: rgba(255, 255, 255, 0.5); font-size: 12px; line-height: 1.6; margin: 32px 0 0 0;">
+                                            Or copy and paste this link into your browser:<br>
+                                            <a href="{{ .ConfirmationURL }}" style="color: rgba(255, 255, 255, 0.7); word-break: break-all;">{{ .ConfirmationURL }}</a>
+                                        </p>
+                                        
+                                        <!-- Security note -->
+                                        <p style="color: rgba(255, 255, 255, 0.5); font-size: 12px; line-height: 1.6; margin: 24px 0 0 0;">
+                                            This link will expire in 1 hour. If you didn't request this, you can safely ignore this email.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 32px 20px; text-align: center;">
+                            <p style="color: rgba(255, 255, 255, 0.4); font-size: 12px; line-height: 1.6; margin: 0;">
+                                Los Angeles | November 7th<br>
+                                © 2025 ADOS. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+

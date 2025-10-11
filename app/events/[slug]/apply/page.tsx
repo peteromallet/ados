@@ -1,25 +1,55 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { EventWithDetails } from '@/lib/types'
+import { EventWithDetails, Invite } from '@/lib/types'
 import { Questionnaire } from '@/components/Questionnaire'
 import { AuthModal } from '@/components/AuthModal'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 
 export default function ApplyPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [event, setEvent] = useState<EventWithDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [invite, setInvite] = useState<Invite | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
     async function checkAuthAndLoadEvent() {
       try {
+        // Check for invite code in URL
+        const inviteCode = searchParams.get('invite')
+        if (inviteCode) {
+          const { data: inviteData, error: inviteError } = await supabase
+            .from('invites')
+            .select('*')
+            .eq('code', inviteCode)
+            .single()
+
+          if (!inviteError && inviteData) {
+            // Check if invite has uses left
+            if (inviteData.used_count < inviteData.max_uses) {
+              setInvite(inviteData)
+            } else {
+              setError('This invite code has been used up')
+              setLoading(false)
+              return
+            }
+          } else {
+            setError('Invalid invite code')
+            setLoading(false)
+            return
+          }
+        }
+
         // Check authentication first
         const { data: { user } } = await supabase.auth.getUser()
         
@@ -49,19 +79,36 @@ export default function ApplyPage() {
 
         if (questionsError) throw questionsError
 
-        // Check if user already applied
+        // Check if user has existing answers and load them
         const { data: existingAttendance } = await supabase
           .from('attendance')
-          .select('*')
-          .eq('event_id', eventData.id)
+          .select('id')
           .eq('user_id', user.id)
+          .eq('event_id', eventData.id)
           .single()
 
         if (existingAttendance) {
-          router.push(`/events/${params.slug}`)
-          return
-        }
+          setIsUpdating(true)
+          
+          // Load existing answers
+          const { data: existingAnswers } = await supabase
+            .from('answers')
+            .select('question_id, answer_text')
+            .eq('attendance_id', existingAttendance.id)
 
+          // Pre-populate localStorage with existing answers
+          if (existingAnswers && existingAnswers.length > 0) {
+            const answersMap: Record<string, string> = {}
+            existingAnswers.forEach(answer => {
+              answersMap[answer.question_id] = answer.answer_text
+            })
+            
+            // Save to localStorage so the questionnaire component can load them
+            const storageKey = `questionnaire_${eventData.id}`
+            localStorage.setItem(storageKey, JSON.stringify(answersMap))
+          }
+        }
+        
         setEvent({ ...eventData, questions: questions || [] })
       } catch (err) {
         console.error('Error loading event:', err)
@@ -72,7 +119,7 @@ export default function ApplyPage() {
     }
 
     checkAuthAndLoadEvent()
-  }, [params.slug, router, supabase])
+  }, [params.slug, router, supabase, searchParams])
 
   const handleSubmit = async (answers: { question_id: string; answer_text: string }[]) => {
     try {
@@ -82,34 +129,78 @@ export default function ApplyPage() {
         throw new Error('User not authenticated or event not loaded')
       }
 
-      // Create attendance record
-      const { data: attendance, error: attendanceError } = await supabase
+      // Check if attendance record already exists
+      const { data: existingAttendance } = await supabase
         .from('attendance')
-        .insert({
-          user_id: user.id,
-          event_id: event.id,
-          status: 'pending',
-        })
-        .select()
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('event_id', event.id)
         .single()
 
-      if (attendanceError) throw attendanceError
+      let attendanceId: string
 
-      // Create answer records
-      const answerInserts = answers.map(answer => ({
-        attendance_id: attendance.id,
-        question_id: answer.question_id,
-        answer_text: answer.answer_text,
-      }))
+      if (existingAttendance) {
+        // Update existing submission
+        attendanceId = existingAttendance.id
 
-      const { error: answersError } = await supabase
-        .from('answers')
-        .insert(answerInserts)
+        // Delete old answers
+        await supabase
+          .from('answers')
+          .delete()
+          .eq('attendance_id', attendanceId)
 
-      if (answersError) throw answersError
+        // Insert new answers
+        const answerInserts = answers.map(answer => ({
+          attendance_id: attendanceId,
+          question_id: answer.question_id,
+          answer_text: answer.answer_text,
+        }))
 
-      // Redirect to success page
-      router.push('/success')
+        const { error: answersError } = await supabase
+          .from('answers')
+          .insert(answerInserts)
+
+        if (answersError) throw answersError
+      } else {
+        // Create new attendance record
+        const { data: attendance, error: attendanceError } = await supabase
+          .from('attendance')
+          .insert({
+            user_id: user.id,
+            event_id: event.id,
+            status: 'pending',
+            invite_code: invite?.code || null,
+          })
+          .select()
+          .single()
+
+        if (attendanceError) throw attendanceError
+        attendanceId = attendance.id
+
+        // Create answer records
+        const answerInserts = answers.map(answer => ({
+          attendance_id: attendanceId,
+          question_id: answer.question_id,
+          answer_text: answer.answer_text,
+        }))
+
+        const { error: answersError } = await supabase
+          .from('answers')
+          .insert(answerInserts)
+
+        if (answersError) throw answersError
+
+        // Increment invite usage if an invite was used
+        if (invite) {
+          await supabase
+            .from('invites')
+            .update({ used_count: invite.used_count + 1 })
+            .eq('code', invite.code)
+        }
+      }
+
+      // Redirect back to event page with success message
+      router.push(`/events/${params.slug}?success=true`)
     } catch (err) {
       console.error('Error submitting application:', err)
       throw err
@@ -142,14 +233,41 @@ export default function ApplyPage() {
         </div>
       )}
       
-          {!loading && !showAuthModal && isAuthenticated && event && event.questions && event.questions.length > 0 && (
-            <div className="min-h-screen pt-8 sm:pt-16 md:pt-24 bg-white">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-text-dark mb-2">Apply to {event.name}</h1>
-            <p className="text-text-light">Please answer the following questions</p>
-          </div>
+      {!loading && !showAuthModal && isAuthenticated && event && event.questions && event.questions.length > 0 && (
+        <div className="relative min-h-screen overflow-hidden">
+          {/* Video Background */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute top-0 left-0 w-full h-full object-cover"
+          >
+            <source src="/background-hero.mp4" type="video/mp4" />
+          </video>
           
-          <Questionnaire questions={event.questions} onSubmit={handleSubmit} />
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/40" />
+          
+          {/* Content */}
+          <div className="relative z-10 pt-8 sm:pt-16 md:pt-24">
+            <div className="flex items-center justify-center mb-4 gap-4">
+              <Link 
+                href={`/events/${params.slug}`}
+                className="text-white/80 hover:text-white transition-colors"
+              >
+                <ArrowLeft size={32} />
+              </Link>
+              <h1 className="text-4xl font-bold text-white">{event.name}</h1>
+            </div>
+            
+            <Questionnaire 
+              questions={event.questions} 
+              onSubmit={handleSubmit} 
+              isUpdating={isUpdating}
+              inviteName={invite?.name}
+            />
+          </div>
         </div>
       )}
     </>
