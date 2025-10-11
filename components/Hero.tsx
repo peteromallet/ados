@@ -20,6 +20,7 @@ export function Hero() {
   const preloadVideoRef = useRef<HTMLVideoElement>(null)
   const searchParams = useSearchParams()
   const [inviteName, setInviteName] = useState<string | null>(null)
+  const [showInviteButton, setShowInviteButton] = useState(false)
   const supabase = createClient()
 
   const handleVibeChange = (newVibe: 'chill' | 'epic') => {
@@ -49,6 +50,9 @@ export function Hero() {
     const inviteCode = searchParams.get('invite')
     if (inviteCode) {
       async function fetchInvite() {
+        // Small delay to make the animation more noticeable
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
         const { data, error } = await supabase
           .from('invites')
           .select('name')
@@ -57,6 +61,10 @@ export function Hero() {
         
         if (!error && data) {
           setInviteName(data.name)
+          // Delay showing the button change until after name animation completes
+          setTimeout(() => {
+            setShowInviteButton(true)
+          }, 1200) // Wait for name animation to complete
         }
       }
       fetchInvite()
@@ -99,7 +107,7 @@ export function Hero() {
     chill: {
       subtitle: 'A celebration of art and open source AI',
       date: 'Los Angeles | November 7th',
-      cta: inviteName ? "Accept Invitation" : "I'd like to join",
+      cta: showInviteButton ? "Accept Invitation" : "I'd like to join",
       watchTrailer: 'Watch the Trailer',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts{'\n'}- Evening: show, drinks, frivolities{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
@@ -108,7 +116,7 @@ export function Hero() {
     epic: {
       subtitle: 'A SYMPOSIUM ON THE FUTURE OF CREATIVITY',
       date: 'The City of Angels | November 7th',
-      cta: inviteName ? "Accept Invitation" : 'I am worthy',
+      cta: showInviteButton ? "Accept Invitation" : 'I am worthy',
       watchTrailer: 'Feast your eyes',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts - for hardcore enthusiasts{'\n'}- Evening: show, drinks, frivolities - for curious people{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
@@ -273,16 +281,38 @@ export function Hero() {
         >
               <div className="w-full max-w-5xl flex flex-col items-center px-4">
                 {inviteName && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className={`text-sm sm:text-base md:text-lg mb-4 font-light uppercase text-center tracking-wider ${
-                      vibe === 'epic' ? 'text-black/70' : 'text-white/70'
-                    }`}
+                  <motion.div
+                    initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ 
+                      duration: 0.8, 
+                      ease: [0.16, 1, 0.3, 1],
+                      delay: 0.1
+                    }}
+                    className="mb-4 relative"
                   >
-                    An Invitation To {inviteName}
-                  </motion.p>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                      className={`absolute bottom-0 left-0 h-[2px] ${
+                        vibe === 'epic' ? 'bg-black/30' : 'bg-white/30'
+                      }`}
+                    />
+                    <p className={`text-sm sm:text-base md:text-lg font-light uppercase text-center tracking-wider px-4 pb-2 ${
+                      vibe === 'epic' ? 'text-black/70' : 'text-white/70'
+                    }`}>
+                      An Invitation To{' '}
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.4, delay: 0.5 }}
+                        className="font-semibold"
+                      >
+                        {inviteName}
+                      </motion.span>
+                    </p>
+                  </motion.div>
                 )}
                 <h1 className={`text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-8 uppercase text-center transition-colors duration-300 ${
                   vibe === 'epic' ? 'text-black' : 'text-white'
@@ -313,14 +343,26 @@ export function Hero() {
           <div className="flex flex-col gap-6 items-center">
             <Link href={inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : "/events/ados-2025"}>
               <motion.div
-                key={`cta-${vibe}`}
+                key={`cta-${vibe}-${inviteName ? 'invite' : 'normal'}`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <Button size="lg" className="min-w-[200px]" isDark={vibe === 'epic'}>
-                  {content[vibe].cta}
-                </Button>
+                <motion.div
+                  animate={showInviteButton ? {
+                    scale: [1, 1.05, 1],
+                    boxShadow: [
+                      'none',
+                      vibe === 'epic' ? '0 0 20px rgba(0,0,0,0.3)' : '0 0 20px rgba(255,255,255,0.3)',
+                      'none'
+                    ]
+                  } : {}}
+                  transition={{ duration: 0.6 }}
+                >
+                  <Button size="lg" className="min-w-[200px]" isDark={vibe === 'epic'}>
+                    {content[vibe].cta}
+                  </Button>
+                </motion.div>
               </motion.div>
             </Link>
             
