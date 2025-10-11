@@ -8,6 +8,7 @@ export interface Database {
           discord_id: string | null
           avatar_url: string | null
           email: string | null
+          role: string | null
           created_at: string
           updated_at: string
         }
@@ -17,6 +18,7 @@ export interface Database {
           discord_id?: string | null
           avatar_url?: string | null
           email?: string | null
+          role?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -26,6 +28,7 @@ export interface Database {
           discord_id?: string | null
           avatar_url?: string | null
           email?: string | null
+          role?: string | null
           created_at?: string
           updated_at?: string
         }

@@ -25,8 +25,19 @@ export default function ApplyPage() {
   useEffect(() => {
     async function checkAuthAndLoadEvent() {
       try {
-        // Check for invite code in URL
-        const inviteCode = searchParams.get('invite')
+        // Check for invite code in URL or localStorage
+        let inviteCode = searchParams.get('invite')
+        
+        if (!inviteCode) {
+          // Try to load from localStorage
+          const storedInvite = localStorage.getItem('invite_code')
+          if (storedInvite) {
+            const { code, name } = JSON.parse(storedInvite)
+            inviteCode = code
+            setInvite({ code, name } as any)
+          }
+        }
+        
         if (inviteCode) {
           const { data: inviteData, error: inviteError } = await supabase
             .from('invites')
@@ -38,13 +49,20 @@ export default function ApplyPage() {
             // Check if invite has uses left
             if (inviteData.used_count < inviteData.max_uses) {
               setInvite(inviteData)
+              // Persist to localStorage
+              localStorage.setItem('invite_code', JSON.stringify({
+                code: inviteData.code,
+                name: inviteData.name
+              }))
             } else {
               setError('This invite code has been used up')
+              localStorage.removeItem('invite_code')
               setLoading(false)
               return
             }
           } else {
             setError('Invalid invite code')
+            localStorage.removeItem('invite_code')
             setLoading(false)
             return
           }
@@ -196,6 +214,9 @@ export default function ApplyPage() {
             .from('invites')
             .update({ used_count: invite.used_count + 1 })
             .eq('code', invite.code)
+          
+          // Clear invite from localStorage after successful submission
+          localStorage.removeItem('invite_code')
         }
       }
 

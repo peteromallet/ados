@@ -21,6 +21,8 @@ export function Hero() {
   const searchParams = useSearchParams()
   const [inviteName, setInviteName] = useState<string | null>(null)
   const [showInviteButton, setShowInviteButton] = useState(false)
+  const [invalidInvite, setInvalidInvite] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const supabase = createClient()
 
   const handleVibeChange = (newVibe: 'chill' | 'epic') => {
@@ -45,6 +47,25 @@ export function Hero() {
     }, 600) // End glitch
   }
 
+  // Check if user is admin
+  useEffect(() => {
+    async function checkAdmin() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile?.role === 'admin') {
+          setIsAdmin(true)
+        }
+      }
+    }
+    checkAdmin()
+  }, [supabase])
+
   // Fetch invite name from database
   useEffect(() => {
     const inviteCode = searchParams.get('invite')
@@ -55,16 +76,30 @@ export function Hero() {
         
         const { data, error } = await supabase
           .from('invites')
-          .select('name')
+          .select('*')
           .eq('code', inviteCode)
           .single()
         
         if (!error && data) {
-          setInviteName(data.name)
-          // Delay showing the button change until after name animation completes
-          setTimeout(() => {
-            setShowInviteButton(true)
-          }, 1200) // Wait for name animation to complete
+          // Check if invite has uses left
+          if (data.used_count < data.max_uses) {
+            setInviteName(data.name)
+            // Persist to localStorage
+            localStorage.setItem('invite_code', JSON.stringify({
+              code: inviteCode,
+              name: data.name
+            }))
+            // Delay showing the button change until after name animation completes
+            setTimeout(() => {
+              setShowInviteButton(true)
+            }, 1200) // Wait for name animation to complete
+          } else {
+            // Invite is used up
+            setInvalidInvite(true)
+          }
+        } else {
+          // Invalid invite code
+          setInvalidInvite(true)
         }
       }
       fetchInvite()
@@ -126,6 +161,14 @@ export function Hero() {
 
   return (
     <div className="relative h-[100dvh] flex items-center justify-center overflow-hidden">
+      {/* Admin Button */}
+      {isAdmin && (
+        <Link href="/admin">
+          <button className="absolute top-6 right-6 z-50 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white font-semibold transition-all">
+            Admin
+          </button>
+        </Link>
+      )}
       {/* Background Video */}
       {/* Visible Background Video */}
       <motion.video
@@ -310,6 +353,39 @@ export function Hero() {
                         className="font-semibold"
                       >
                         {inviteName}
+                      </motion.span>
+                    </p>
+                  </motion.div>
+                )}
+                {invalidInvite && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ 
+                      duration: 0.8, 
+                      ease: [0.16, 1, 0.3, 1],
+                      delay: 0.1
+                    }}
+                    className="mb-4 relative"
+                  >
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                      className={`absolute bottom-0 left-0 h-[2px] ${
+                        vibe === 'epic' ? 'bg-black/30' : 'bg-white/30'
+                      }`}
+                    />
+                    <p className={`text-sm sm:text-base md:text-lg font-light uppercase text-center tracking-wider px-4 pb-2 ${
+                      vibe === 'epic' ? 'text-black/70' : 'text-white/70'
+                    }`}>
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.4, delay: 0.5 }}
+                        className="font-semibold"
+                      >
+                        Nice try
                       </motion.span>
                     </p>
                   </motion.div>

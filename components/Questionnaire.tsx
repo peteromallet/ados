@@ -213,7 +213,7 @@ export function Questionnaire({ questions, onSubmit, isUpdating = false, inviteN
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6 border-2 border-blue-500">
           <h3 className="text-xl font-bold text-gray-900 mb-2">Accept Invitation</h3>
           <p className="text-gray-700">
-            You've been invited by <span className="font-semibold text-blue-600">{inviteName}</span>
+            You signed up at an invite link belonging to <span className="font-semibold text-blue-600">{inviteName}</span>
           </p>
         </div>
       )}
