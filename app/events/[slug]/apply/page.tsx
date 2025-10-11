@@ -20,6 +20,7 @@ export default function ApplyPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [invite, setInvite] = useState<Invite | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -135,6 +136,14 @@ export default function ApplyPage() {
   }, [params.slug, router, supabase, searchParams])
 
   const handleSubmit = async (answers: { question_id: string; answer_text: string }[]) => {
+    // Prevent duplicate submissions
+    if (isSubmitting) {
+      console.log('⚠️ Submission already in progress, ignoring duplicate click')
+      return
+    }
+
+    setIsSubmitting(true)
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -221,6 +230,8 @@ export default function ApplyPage() {
     } catch (err) {
       console.error('Error submitting application:', err)
       throw err
+    } finally {
+      setIsSubmitting(false)
     }
   }
 

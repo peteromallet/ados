@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -21,6 +21,16 @@ export function AuthModal({ isOpen, onClose, redirectTo }: AuthModalProps) {
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
   const router = useRouter()
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoading(false)
+      setEmail('')
+      setEmailSent(false)
+      setError(null)
+    }
+  }, [isOpen])
 
   const handleDiscordSignIn = async () => {
     setIsLoading(true)
