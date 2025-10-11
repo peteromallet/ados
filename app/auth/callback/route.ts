@@ -5,6 +5,9 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const redirect = requestUrl.searchParams.get('redirect') || '/events'
+  
+  // Use the app URL from env or fall back to request origin
+  const origin = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin
 
   if (code) {
     const supabase = await createClient()
@@ -13,7 +16,7 @@ export async function GET(request: Request) {
     const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (error) {
-      return NextResponse.redirect(`${requestUrl.origin}/auth/signin?error=auth_failed`)
+      return NextResponse.redirect(`${origin}/auth/signin?error=auth_failed`)
     }
 
     if (user) {
@@ -30,9 +33,9 @@ export async function GET(request: Request) {
       })
     }
 
-    return NextResponse.redirect(`${requestUrl.origin}${redirect}`)
+    return NextResponse.redirect(`${origin}${redirect}`)
   }
 
-  return NextResponse.redirect(`${requestUrl.origin}/auth/signin`)
+  return NextResponse.redirect(`${origin}/auth/signin`)
 }
 
