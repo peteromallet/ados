@@ -29,6 +29,42 @@ export default function EventDetailPage() {
   const [isSubmittingInvite, setIsSubmittingInvite] = useState(false)
   const showSuccess = searchParams.get('success') === 'true'
 
+  // Prefetch apply page data in the background
+  const prefetchApplyData = async () => {
+    if (!event) return
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Prefetch event with questions
+      supabase
+        .from('events')
+        .select(`
+          *,
+          questions (*)
+        `)
+        .eq('slug', params.slug as string)
+        .order('order_index', { foreignTable: 'questions', ascending: true })
+        .single()
+        .then(() => console.log('✅ Prefetched apply page data'))
+
+      // Prefetch existing attendance/answers if they exist
+      supabase
+        .from('attendance')
+        .select(`
+          id,
+          answers (question_id, answer_text)
+        `)
+        .eq('user_id', user.id)
+        .eq('event_id', event.id)
+        .single()
+    } catch (err) {
+      // Silent fail - this is just optimization
+      console.log('Prefetch skipped:', err)
+    }
+  }
+
   useEffect(() => {
     async function loadEvent() {
       try {
@@ -70,6 +106,21 @@ export default function EventDetailPage() {
 
     loadEvent()
   }, [params.slug, supabase])
+
+  // Prefetch apply page data after event loads
+  useEffect(() => {
+    if (event && isAuthenticated) {
+      // Prefetch the route
+      router.prefetch(`/events/${params.slug}/apply`)
+      
+      // Prefetch data in background after a short delay (to not block main thread)
+      const timer = setTimeout(() => {
+        prefetchApplyData()
+      }, 500)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [event, isAuthenticated])
 
   // Check for pending invite code after auth
   useEffect(() => {
@@ -290,7 +341,14 @@ export default function EventDetailPage() {
             </Button>
           ) : (
             <>
-              <Button size="lg" onClick={handleApplyClick}>
+              <Button 
+                size="lg" 
+                onClick={handleApplyClick}
+                onMouseEnter={() => {
+                  router.prefetch(`/events/${params.slug}/apply`)
+                  prefetchApplyData()
+                }}
+              >
                 Proceed to questions
               </Button>
               <button

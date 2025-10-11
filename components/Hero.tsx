@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { VideoModal } from '@/components/VideoModal'
 import { InfoTooltip } from '@/components/InfoTooltip'
@@ -19,6 +19,7 @@ export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const preloadVideoRef = useRef<HTMLVideoElement>(null)
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [inviteName, setInviteName] = useState<string | null>(null)
   const [showInviteButton, setShowInviteButton] = useState(false)
   const [invalidInvite, setInvalidInvite] = useState(false)
@@ -449,7 +450,13 @@ export function Hero() {
                 </motion.p>
               </div>
           <div className="flex flex-col gap-6 items-center">
-            <Link href={inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : getCtaLink()}>
+            <Link 
+              href={inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : getCtaLink()}
+              onMouseEnter={() => {
+                // Prefetch the event detail page
+                router.prefetch('/events/ados-2025')
+              }}
+            >
               <motion.div
                 key={`cta-${vibe}-${inviteName ? 'invite' : 'normal'}`}
                 initial={{ opacity: 0, scale: 0.9 }}
