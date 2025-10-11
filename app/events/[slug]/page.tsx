@@ -33,14 +33,20 @@ export default function EventDetailPage() {
   useEffect(() => {
     async function loadEvent() {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        setIsAuthenticated(!!user)
+        // Run auth and event fetch in parallel
+        const [userResult, eventResult] = await Promise.all([
+          supabase.auth.getUser(),
+          supabase
+            .from('events')
+            .select('*')
+            .eq('slug', params.slug as string)
+            .single()
+        ])
 
-        const { data: eventData, error } = await supabase
-          .from('events')
-          .select('*')
-          .eq('slug', params.slug as string)
-          .single()
+        const { data: { user } } = userResult
+        const { data: eventData, error } = eventResult
+
+        setIsAuthenticated(!!user)
 
         if (error) {
           console.error('Error loading event:', error)
@@ -49,22 +55,25 @@ export default function EventDetailPage() {
           return
         }
 
-        if (user) {
-          const { data: attendance } = await supabase
+        setEvent(eventData)
+
+        // Check attendance after setting event (non-blocking)
+        if (user && eventData) {
+          supabase
             .from('attendance')
             .select('*')
             .eq('event_id', eventData.id)
             .eq('user_id', user.id)
             .single()
-
-          setHasApplied(!!attendance)
+            .then(({ data: attendance }) => {
+              setHasApplied(!!attendance)
+            })
         }
 
-        setEvent(eventData)
+        setLoading(false)
       } catch (err) {
         console.error('Error loading event:', err)
         setError(err instanceof Error ? err.message : 'An unexpected error occurred')
-      } finally {
         setLoading(false)
       }
     }
