@@ -36,15 +36,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# unused/backup video files
-public/peter_cut.mp4
-public/full.mp4
-public/bg_old.mp4
-public/bg_original.mp4
-public/bg_epic.mov
-public/icon-backup.png
-public/favicon-original.ico
-
 # supabase temp files
 supabase/.temp/
 

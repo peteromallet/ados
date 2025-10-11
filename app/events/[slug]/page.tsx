@@ -200,10 +200,10 @@ export default function EventDetailPage() {
         loop
         muted
         playsInline
-        poster="/background-hero-poster.jpg"
+        poster="/chill-hero-poster.jpg"
         className="fixed inset-0 w-full h-full object-cover -z-10"
       >
-        <source src="/background-hero.mp4" type="video/mp4" />
+        <source src="/chill-hero.mp4" type="video/mp4" />
       </video>
 
       {/* Overlay */}

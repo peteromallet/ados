@@ -181,12 +181,13 @@ export default function ApplyPage() {
         if (answersError) throw answersError
       } else {
         // Create new attendance record
+        // Auto-approve if they used an invite code
         const { data: attendance, error: attendanceError } = await supabase
           .from('attendance')
           .insert({
             user_id: user.id,
             event_id: event.id,
-            status: 'pending',
+            status: invite ? 'approved' : 'pending',
             invite_code: invite?.code || null,
           })
           .select()
@@ -264,7 +265,7 @@ export default function ApplyPage() {
             playsInline
             className="absolute top-0 left-0 w-full h-full object-cover"
           >
-            <source src="/background-hero.mp4" type="video/mp4" />
+            <source src="/chill-hero.mp4" type="video/mp4" />
           </video>
           
           {/* Overlay */}

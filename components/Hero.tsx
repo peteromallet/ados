@@ -134,8 +134,8 @@ export function Hero() {
       const currentTime = video.currentTime
       const wasPlaying = !video.paused
       
-      video.poster = vibe === 'epic' ? '/epic-showcase-poster.jpg' : '/background-hero-poster.jpg'
-      video.src = vibe === 'epic' ? '/epic-showcase.mp4' : '/background-hero.mp4'
+      video.poster = vibe === 'epic' ? '/epic-hero-poster.jpg' : '/chill-hero-poster.jpg'
+      video.src = vibe === 'epic' ? '/epic-hero.mp4' : '/chill-hero.mp4'
       video.load()
       
       const handleCanPlay = () => {
@@ -149,7 +149,7 @@ export function Hero() {
       
       // Update preload video to load the opposite video
       if (preloadVideoRef.current) {
-        preloadVideoRef.current.src = vibe === 'epic' ? '/background-hero.mp4' : '/epic-showcase.mp4'
+        preloadVideoRef.current.src = vibe === 'epic' ? '/chill-hero.mp4' : '/epic-hero.mp4'
         preloadVideoRef.current.load()
       }
       
@@ -183,7 +183,7 @@ export function Hero() {
     epic: {
       subtitle: 'A SYMPOSIUM ON THE FUTURE OF CREATIVITY',
       date: 'The City of Angels | November 7th',
-      cta: showInviteButton ? "Accept Invitation" : (applicationStatus === 'approved' ? "We're excited to have you join!" : (applicationStatus === 'pending' ? "Check status" : 'I am worthy')),
+      cta: getCtaText(),
       watchTrailer: 'Feast your eyes',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts - for hardcore enthusiasts{'\n'}- Evening: show, drinks, frivolities - for curious people{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
@@ -209,7 +209,7 @@ export function Hero() {
         loop
         muted
         playsInline
-        poster={vibe === 'epic' ? '/bg_epic_poster.jpg' : '/bg_poster.jpg'}
+        poster={vibe === 'epic' ? '/epic-hero-poster.jpg' : '/chill-hero-poster.jpg'}
         initial={{ opacity: 0, scale: 1.1 }}
         animate={{ 
           opacity: 1,
@@ -222,7 +222,7 @@ export function Hero() {
           filter: isGlitching ? `blur(8px) saturate(2) hue-rotate(${rotationDirection === 'right' ? 30 : -30}deg)` : 'none',
         }}
       >
-        <source src={vibe === 'epic' ? '/epic-showcase.mp4' : '/background-hero.mp4'} type="video/mp4" />
+        <source src={vibe === 'epic' ? '/epic-hero.mp4' : '/chill-hero.mp4'} type="video/mp4" />
       </motion.video>
 
       {/* Hidden preload video for the inactive vibe */}
@@ -522,32 +522,42 @@ export function Hero() {
             <div className="mt-8">
               <VibeToggle value={vibe} onChange={handleVibeChange} />
             </div>
+
+            {/* Hosted By Section */}
+            <div className="mt-12 flex items-center justify-center gap-4">
+              <p className={`text-sm font-light uppercase tracking-wider ${
+                vibe === 'epic' ? 'text-black/50' : 'text-white/50'
+              }`}>
+                Cohosted by
+              </p>
+              <div className="flex items-center gap-3">
+                <a href="https://www.asteriafilm.com" target="_blank" rel="noopener noreferrer" className="opacity-75 hover:opacity-100 transition-opacity">
+                  <img 
+                    src="/a.png" 
+                    alt="Asteria" 
+                    className="h-8 w-8 object-contain transition-all" 
+                    style={{ filter: vibe === 'epic' ? 'invert(1)' : 'none' }}
+                  />
+                </a>
+                <span className={`text-xl ${vibe === 'epic' ? 'text-black/30' : 'text-white/30'}`}>×</span>
+                <a href="https://banodoco.ai/" target="_blank" rel="noopener noreferrer" className="opacity-75 hover:opacity-100 transition-opacity">
+                  <img 
+                    src="/b.png" 
+                    alt="Banodoco" 
+                    className="h-8 w-8 object-contain transition-all" 
+                    style={{ filter: vibe === 'epic' ? 'invert(1)' : 'none' }}
+                  />
+                </a>
+              </div>
+            </div>
           </div>
         </motion.div>
       </motion.div>
 
-      {/* Hosted By Section */}
-      <div className="absolute bottom-6 left-0 right-0 z-10 flex items-center justify-center gap-4">
-        <p className={`text-sm font-light uppercase tracking-wider ${
-          vibe === 'epic' ? 'text-black/50' : 'text-white/50'
-        }`}>
-          Cohosted by
-        </p>
-        <div className="flex items-center gap-3">
-          <a href="https://www.asteriafilm.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-            <img src="/a.png" alt="Asteria" className="h-8 w-8 object-contain" />
-          </a>
-          <span className={`text-xl ${vibe === 'epic' ? 'text-black/30' : 'text-white/30'}`}>×</span>
-          <a href="https://banodoco.ai/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-            <img src="/b.png" alt="Banodoco" className="h-8 w-8 object-contain" />
-          </a>
-        </div>
-      </div>
-
       <VideoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        videoSrc={vibe === 'epic' ? '/epic-showcase-full.mp4' : '/background-hero-full.mp4'}
+        videoSrc={vibe === 'epic' ? '/epic-hero-full.mp4' : '/chill-hero-full.mp4'}
       />
     </div>
   )

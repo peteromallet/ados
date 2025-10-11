@@ -22,6 +22,9 @@ export default function AdminPage() {
   const [error, setError] = useState('')
   const [invites, setInvites] = useState<any[]>([])
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [attendees, setAttendees] = useState<any[]>([])
+  const [statusFilter, setStatusFilter] = useState<string>('pending')
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
 
   useEffect(() => {
     async function checkAdmin() {
@@ -46,8 +49,9 @@ export default function AdminPage() {
       setIsAdmin(true)
       setLoading(false)
       
-      // Load existing invites
+      // Load existing invites and attendees
       loadInvites()
+      loadAttendees()
     }
 
     checkAdmin()
@@ -61,6 +65,54 @@ export default function AdminPage() {
     
     if (!error && data) {
       setInvites(data)
+    }
+  }
+
+  const loadAttendees = async () => {
+    const { data, error } = await supabase
+      .from('attendance')
+      .select(`
+        *,
+        profiles!attendance_user_id_fkey(
+          email,
+          discord_username,
+          avatar_url
+        ),
+        events(name, slug),
+        answers!answers_attendance_id_fkey(
+          id,
+          answer_text,
+          questions(question_text)
+        )
+      `)
+      .order('applied_at', { ascending: false })
+    
+    console.log('Load attendees data:', data)
+    console.log('Load attendees error:', error)
+    
+    if (!error && data) {
+      setAttendees(data)
+    }
+  }
+
+  const updateAttendeeStatus = async (attendanceId: string, newStatus: 'approved' | 'rejected') => {
+    setUpdatingStatus(attendanceId)
+    
+    try {
+      const { error } = await supabase
+        .from('attendance')
+        .update({ status: newStatus })
+        .eq('id', attendanceId)
+      
+      if (error) throw error
+      
+      // Reload attendees
+      await loadAttendees()
+    } catch (err) {
+      console.error('Error updating status:', err)
+      alert('Failed to update status')
+    } finally {
+      setUpdatingStatus(null)
     }
   }
 
@@ -166,10 +218,11 @@ export default function AdminPage() {
           <Link href="/" className="text-gray-600 hover:text-gray-900">
             <ArrowLeft size={24} />
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900">Admin - Create Invite</h1>
+          <h1 className="text-4xl font-bold text-gray-900">Admin</h1>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Invite</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -244,7 +297,7 @@ export default function AdminPage() {
                   className="flex-1"
                 />
                 <Button
-                  onClick={copyToClipboard}
+                  onClick={() => copyToClipboard()}
                   variant="secondary"
                   className="flex items-center gap-2"
                 >
@@ -263,6 +316,145 @@ export default function AdminPage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Attendee Management */}
+        <div className="mt-8 bg-white rounded-lg shadow-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Manage Attendees</h2>
+          
+          {/* Status Filter */}
+          <div className="flex gap-2 mb-6 flex-wrap">
+            {['pending', 'approved', 'rejected', 'all'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                className={`px-4 py-2 rounded-lg font-semibold capitalize transition-colors ${
+                  statusFilter === status
+                    ? 'bg-black text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {status}
+                <span className="ml-2 text-sm opacity-75">
+                  ({attendees.filter(a => status === 'all' ? true : a.status === status).length})
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Attendees List */}
+          <div className="space-y-4">
+            {attendees
+              .filter(a => statusFilter === 'all' ? true : a.status === statusFilter)
+              .map((attendee) => (
+                  <div key={attendee.id} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex gap-4">
+                      {attendee.profiles?.avatar_url && (
+                        <img 
+                          src={attendee.profiles.avatar_url} 
+                          alt={attendee.profiles.discord_username || 'User'} 
+                          className="w-12 h-12 rounded-full"
+                        />
+                      )}
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {attendee.profiles?.discord_username || 'Unknown User'}
+                        </h3>
+                        <p className="text-sm text-gray-600">{attendee.profiles?.email}</p>
+                        {attendee.events && (
+                          <p className="text-xs text-purple-600 mt-1">
+                            Event: <span className="font-semibold">{attendee.events.name}</span>
+                          </p>
+                        )}
+                        {attendee.invite_code && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            Invited via: <span className="font-mono">{attendee.invite_code}</span>
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-400 mt-1">
+                          Applied {new Date(attendee.applied_at).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        attendee.status === 'approved' ? 'bg-green-100 text-green-800' :
+                        attendee.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {attendee.status}
+                      </span>
+                      
+                      {attendee.status === 'pending' && (
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => updateAttendeeStatus(attendee.id, 'approved')}
+                            disabled={updatingStatus === attendee.id}
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            {updatingStatus === attendee.id ? '...' : 'Approve'}
+                          </Button>
+                          <Button
+                            onClick={() => updateAttendeeStatus(attendee.id, 'rejected')}
+                            disabled={updatingStatus === attendee.id}
+                            size="sm"
+                            variant="secondary"
+                            className="bg-red-100 hover:bg-red-200 text-red-700"
+                          >
+                            {updatingStatus === attendee.id ? '...' : 'Reject'}
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {attendee.status !== 'pending' && (
+                        <Button
+                          onClick={() => updateAttendeeStatus(attendee.id, 'pending')}
+                          disabled={updatingStatus === attendee.id}
+                          size="sm"
+                          variant="secondary"
+                        >
+                          Reset to Pending
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Show answers for pending applications - Full width below */}
+                  {attendee.status === 'pending' && attendee.answers && attendee.answers.length > 0 && (
+                    <div className="pt-4 border-t border-gray-200">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Responses:</h4>
+                      <div className="space-y-3">
+                        {attendee.answers.map((answer: any) => (
+                          <div key={answer.id} className="bg-gray-50 p-3 rounded-lg">
+                            <p className="text-xs font-semibold text-gray-600 mb-1">
+                              {answer.questions?.question_text || 'Question'}
+                            </p>
+                            <p className="text-sm text-gray-900">
+                              {answer.answer_text}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            
+            {attendees.filter(a => statusFilter === 'all' ? true : a.status === statusFilter).length === 0 && (
+              <p className="text-gray-500 text-center py-8">
+                No {statusFilter !== 'all' && statusFilter} attendees found
+              </p>
+            )}
+          </div>
         </div>
 
         {/* List of existing invites */}
