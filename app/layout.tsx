@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'ADOS - The Event That Celebrates Art and Open-Source AI',
-  description: 'Apply to join ADOS events and connect with artists and AI developers',
+  title: 'ADOS - Los Angeles | November 7th',
+  description: 'A celebration of art and open-source AI',
   icons: {
     icon: [
       { url: '/icon.png', type: 'image/png', sizes: '512x512' },
@@ -15,6 +15,28 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'ADOS - Los Angeles | November 7th',
+    description: 'A celebration of art and open-source AI',
+    url: 'https://ados.events',
+    siteName: 'ADOS',
+    images: [
+      {
+        url: '/bg_poster.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'ADOS Event',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ADOS - Los Angeles | November 7th',
+    description: 'A celebration of art and open-source AI',
+    images: ['/bg_poster.jpg'],
+  },
 }
 
 export default function RootLayout({

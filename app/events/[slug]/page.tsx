@@ -273,11 +273,8 @@ export default function EventDetailPage() {
             <li>Day-time: panels, roundtables, hangouts</li>
             <li>Evening: show, drinks, frivolities</li>
           </ul>
-          <p className="text-text-light text-base sm:text-lg leading-relaxed mb-4 sm:mb-6">
-            We have very limited space so we'll ask a few questions to validate if it's a good mutual fit.
-          </p>
           <p className="text-text-light text-base sm:text-lg leading-relaxed">
-            For those who wish to travel, we'll have some financial support.
+            We have very limited space so we'll ask a few questions to validate if it's a good mutual fit.
           </p>
         </div>
 

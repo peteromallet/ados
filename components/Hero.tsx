@@ -23,6 +23,7 @@ export function Hero() {
   const [showInviteButton, setShowInviteButton] = useState(false)
   const [invalidInvite, setInvalidInvite] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [applicationStatus, setApplicationStatus] = useState<string | null>(null)
   const supabase = createClient()
 
   const handleVibeChange = (newVibe: 'chill' | 'epic') => {
@@ -47,9 +48,9 @@ export function Hero() {
     }, 600) // End glitch
   }
 
-  // Check if user is admin
+  // Check if user is admin and application status
   useEffect(() => {
-    async function checkAdmin() {
+    async function checkUserStatus() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const { data: profile } = await supabase
@@ -61,9 +62,29 @@ export function Hero() {
         if (profile?.role === 'admin') {
           setIsAdmin(true)
         }
+
+        // Check if user has applied to the main event (ados-2025)
+        const { data: events } = await supabase
+          .from('events')
+          .select('id')
+          .eq('slug', 'ados-2025')
+          .single()
+
+        if (events) {
+          const { data: attendance } = await supabase
+            .from('attendance')
+            .select('status')
+            .eq('user_id', user.id)
+            .eq('event_id', events.id)
+            .single()
+
+          if (attendance) {
+            setApplicationStatus(attendance.status)
+          }
+        }
       }
     }
-    checkAdmin()
+    checkUserStatus()
   }, [supabase])
 
   // Fetch invite name from database
@@ -138,11 +159,22 @@ export function Hero() {
     }
   }, [vibe])
 
+  const getCtaText = () => {
+    if (showInviteButton) return "Accept Invitation"
+    if (applicationStatus === 'approved') return "We're excited to have you join!"
+    if (applicationStatus === 'pending') return "Check status"
+    return "I'd like to join"
+  }
+
+  const getCtaLink = () => {
+    return '/events/ados-2025'
+  }
+
   const content = {
     chill: {
       subtitle: 'A celebration of art and open source AI',
       date: 'Los Angeles | November 7th',
-      cta: showInviteButton ? "Accept Invitation" : "I'd like to join",
+      cta: getCtaText(),
       watchTrailer: 'Watch the Trailer',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts{'\n'}- Evening: show, drinks, frivolities{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
@@ -151,7 +183,7 @@ export function Hero() {
     epic: {
       subtitle: 'A SYMPOSIUM ON THE FUTURE OF CREATIVITY',
       date: 'The City of Angels | November 7th',
-      cta: showInviteButton ? "Accept Invitation" : 'I am worthy',
+      cta: showInviteButton ? "Accept Invitation" : (applicationStatus === 'approved' ? "We're excited to have you join!" : (applicationStatus === 'pending' ? "Check status" : 'I am worthy')),
       watchTrailer: 'Feast your eyes',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts - for hardcore enthusiasts{'\n'}- Evening: show, drinks, frivolities - for curious people{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
@@ -417,7 +449,7 @@ export function Hero() {
                 </motion.p>
               </div>
           <div className="flex flex-col gap-6 items-center">
-            <Link href={inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : "/events/ados-2025"}>
+            <Link href={inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : getCtaLink()}>
               <motion.div
                 key={`cta-${vibe}-${inviteName ? 'invite' : 'normal'}`}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -493,6 +525,24 @@ export function Hero() {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Hosted By Section */}
+      <div className="absolute bottom-6 left-0 right-0 z-10 flex items-center justify-center gap-4">
+        <p className={`text-sm font-light uppercase tracking-wider ${
+          vibe === 'epic' ? 'text-black/50' : 'text-white/50'
+        }`}>
+          Cohosted by
+        </p>
+        <div className="flex items-center gap-3">
+          <a href="https://www.asteriafilm.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+            <img src="/a.png" alt="Asteria" className="h-8 w-8 object-contain" />
+          </a>
+          <span className={`text-xl ${vibe === 'epic' ? 'text-black/30' : 'text-white/30'}`}>×</span>
+          <a href="https://banodoco.ai/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+            <img src="/b.png" alt="Banodoco" className="h-8 w-8 object-contain" />
+          </a>
+        </div>
+      </div>
 
       <VideoModal
         isOpen={isModalOpen}
