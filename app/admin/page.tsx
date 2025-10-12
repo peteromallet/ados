@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [name, setName] = useState('')
   const [customCode, setCustomCode] = useState('')
   const [maxUses, setMaxUses] = useState('5')
+  const [discordId, setDiscordId] = useState('')
   const [generatedUrl, setGeneratedUrl] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -144,14 +145,21 @@ export default function AdminPage() {
       }
 
       // Create the invite
+      const inviteData: any = {
+        code: code,
+        name: name.trim(),
+        max_uses: uses,
+        used_count: 0,
+      }
+      
+      // Add discord_id if provided
+      if (discordId.trim()) {
+        inviteData.discord_id = discordId.trim()
+      }
+      
       const { error: inviteError } = await supabase
         .from('invites')
-        .insert({
-          code: code,
-          name: name.trim(),
-          max_uses: uses,
-          used_count: 0,
-        })
+        .insert(inviteData)
 
       if (inviteError) {
         if (inviteError.message.includes('duplicate')) {
@@ -174,6 +182,7 @@ export default function AdminPage() {
       setName('')
       setCustomCode('')
       setMaxUses('5')
+      setDiscordId('')
     } catch (err) {
       console.error('Error creating invite:', err)
       setError('Failed to create invite')
@@ -263,6 +272,21 @@ export default function AdminPage() {
                 min="1"
                 required
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Discord ID (optional)
+              </label>
+              <Input
+                type="text"
+                value={discordId}
+                onChange={(e) => setDiscordId(e.target.value)}
+                placeholder="123456789012345678"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                To send a Discord invite notification. Enable Developer Mode in Discord, right-click the user, and select "Copy User ID"
+              </p>
             </div>
 
             {error && (
