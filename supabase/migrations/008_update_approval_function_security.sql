@@ -1,7 +1,5 @@
--- Enable the pg_net extension for HTTP requests
-CREATE EXTENSION IF NOT EXISTS pg_net;
-
--- Create a function to send approval notification via edge function
+-- Update the approval notification function to use attendance_id instead of passing raw email
+-- This improves security by having the edge function validate against the database
 CREATE OR REPLACE FUNCTION send_approval_notification()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -31,10 +29,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create trigger that fires when attendance status changes
-DROP TRIGGER IF EXISTS attendance_status_changed ON attendance;
-CREATE TRIGGER attendance_status_changed
-  AFTER INSERT OR UPDATE OF status ON attendance
-  FOR EACH ROW
-  EXECUTE FUNCTION send_approval_notification();
+-- Add email_sent_at column to track when approval emails were sent
+ALTER TABLE attendance ADD COLUMN IF NOT EXISTS email_sent_at TIMESTAMP WITH TIME ZONE;
+
+-- Add index for querying attendees by email sent status
+CREATE INDEX IF NOT EXISTS idx_attendance_email_sent ON attendance(email_sent_at) WHERE status = 'approved';
+
+-- Add comment explaining the new column
+COMMENT ON COLUMN attendance.email_sent_at IS 'Timestamp when the approval email was sent to the user';
 

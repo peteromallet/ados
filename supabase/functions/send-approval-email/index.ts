@@ -1,6 +1,63 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+const DISCORD_BOT_TOKEN = Deno.env.get('DISCORD_BOT_TOKEN')
+
+// Helper function to send Discord DM
+async function sendDiscordDM(discordId: string, username: string) {
+  if (!DISCORD_BOT_TOKEN) {
+    console.warn('Discord bot token not configured, skipping Discord notification')
+    return { success: false, error: 'No bot token' }
+  }
+
+  try {
+    // First, create a DM channel with the user
+    const dmChannelResponse = await fetch('https://discord.com/api/v10/users/@me/channels', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${DISCORD_BOT_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        recipient_id: discordId,
+      }),
+    })
+
+    if (!dmChannelResponse.ok) {
+      const error = await dmChannelResponse.text()
+      console.error('Failed to create DM channel:', error)
+      return { success: false, error: 'Failed to create DM channel' }
+    }
+
+    const dmChannel = await dmChannelResponse.json()
+
+    // Send the message to the DM channel
+    const messageResponse = await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${DISCORD_BOT_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        content: `Hey ${username}! 🎉\n\nBanodoco is excited to have you joining us for [ADOS LA](https://ados.events/)!\n\n📍 Location: Mack Sennett studios, 1215 Bates Ave, Los Angeles, CA 90029\n📅 Date: November 7th\n⏰ Morning event: 11am-5pm (panels, roundtables, hangouts)\n⏰ Evening event: 7pm-11pm (show, drinks, frivolities)\n\nCheck your email for calendar links and more details. See you there! ✨`,
+      }),
+    })
+
+    if (!messageResponse.ok) {
+      const error = await messageResponse.text()
+      console.error('Failed to send Discord message:', error)
+      return { success: false, error: 'Failed to send message' }
+    }
+
+    return { success: true, data: await messageResponse.json() }
+  } catch (error) {
+    console.error('Discord DM error:', error)
+    return { success: false, error: error.message }
+  }
+}
 
 // Email HTML template stored directly in the function
 const EMAIL_TEMPLATE = `<!DOCTYPE html>
@@ -83,16 +140,75 @@ const EMAIL_TEMPLATE = `<!DOCTYPE html>
 
 serve(async (req) => {
   try {
-    const { email, event_name } = await req.json()
+    const { attendance_id } = await req.json()
 
-    if (!email) {
+    if (!attendance_id) {
       return new Response(
-        JSON.stringify({ error: 'Email is required' }),
+        JSON.stringify({ error: 'attendance_id is required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log(`Sending approval email to ${email} for ${event_name}`)
+    // Initialize Supabase client with service role
+    const supabase = createClient(
+      SUPABASE_URL!,
+      SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    // Query the database to validate the attendance record
+    const { data: attendance, error: queryError } = await supabase
+      .from('attendance')
+      .select(`
+        id,
+        status,
+        user_id,
+        profiles!attendance_user_id_fkey(email, discord_id, discord_username),
+        events(name)
+      `)
+      .eq('id', attendance_id)
+      .single()
+
+    if (queryError || !attendance) {
+      console.error('Attendance record not found:', queryError)
+      return new Response(
+        JSON.stringify({ error: 'Attendance record not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Verify the attendance is actually approved
+    if (attendance.status !== 'approved') {
+      console.warn(`Attempted to send email for non-approved attendance: ${attendance_id} (status: ${attendance.status})`)
+      return new Response(
+        JSON.stringify({ error: 'Attendance is not approved', status: attendance.status }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Get validated data from database
+    const email = attendance.profiles?.email
+    const discordId = attendance.profiles?.discord_id
+    const discordUsername = attendance.profiles?.discord_username
+    const eventName = attendance.events?.name
+
+    if (!email) {
+      console.error('No email found for user:', attendance.user_id)
+      return new Response(
+        JSON.stringify({ error: 'User email not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log(`Sending approval notifications to ${email} for ${eventName} (attendance_id: ${attendance_id})`)
+    if (discordId) {
+      console.log(`  - Will also send Discord DM to ${discordUsername} (${discordId})`)
+    }
 
     // Send email using Resend
     const res = await fetch('https://api.resend.com/emails', {
@@ -119,8 +235,40 @@ serve(async (req) => {
       )
     }
 
+    // Record that the email was sent
+    const { error: updateError } = await supabase
+      .from('attendance')
+      .update({ email_sent_at: new Date().toISOString() })
+      .eq('id', attendance_id)
+
+    if (updateError) {
+      console.warn('Failed to update email_sent_at:', updateError)
+      // Don't fail the request - email was sent successfully
+    }
+
+    // Send Discord DM if user has Discord connected
+    let discordResult = null
+    if (discordId && discordUsername) {
+      console.log(`Sending Discord DM to ${discordUsername}...`)
+      discordResult = await sendDiscordDM(discordId, discordUsername)
+      
+      if (discordResult.success) {
+        console.log(`✅ Discord DM sent successfully to ${discordUsername}`)
+      } else {
+        console.warn(`⚠️ Failed to send Discord DM: ${discordResult.error}`)
+        // Don't fail the request - email was sent successfully
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true, message: `Email sent to ${email}`, data }),
+      JSON.stringify({ 
+        success: true, 
+        message: `Email sent to ${email}${discordId ? ` and Discord DM sent to ${discordUsername}` : ''}`,
+        attendance_id,
+        email_sent: true,
+        discord_sent: discordResult?.success || false,
+        data 
+      }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
   } catch (error) {

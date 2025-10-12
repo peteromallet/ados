@@ -26,9 +26,13 @@ export async function GET(request: Request) {
       // Create or update profile
       const discordUser = user.user_metadata
       
+      // Discord provides: global_name (display name), full_name, name (username), custom_claims.global_name
+      // Priority: global_name > full_name > name
+      const displayName = discordUser.global_name || discordUser.custom_claims?.global_name || discordUser.full_name || discordUser.name
+      
       await supabase.from('profiles').upsert({
         id: user.id,
-        discord_username: discordUser.full_name || discordUser.name,
+        discord_username: displayName,
         discord_id: discordUser.provider_id,
         avatar_url: discordUser.avatar_url,
         email: user.email,
