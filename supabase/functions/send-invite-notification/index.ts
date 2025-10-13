@@ -5,30 +5,37 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 const DISCORD_BOT_TOKEN = Deno.env.get('DISCORD_BOT_TOKEN')
 
-// Helper function to find Discord user by username
-async function findDiscordUser(username: string) {
+// Helper function to get Discord user info
+async function getDiscordUser(discordId: string) {
   if (!DISCORD_BOT_TOKEN) {
     return { success: false, error: 'No bot token' }
   }
 
   try {
-    // Note: Discord doesn't provide a direct username search API
-    // The bot must share a server with the user to find them
-    // This is a limitation - we'll need the discord_id instead of username
-    // For now, we'll return an error suggesting to use discord_id
-    
-    return { 
-      success: false, 
-      error: 'Discord username lookup requires shared server. Please use discord_id instead.' 
+    const userResponse = await fetch(`https://discord.com/api/v10/users/${discordId}`, {
+      headers: {
+        'Authorization': `Bot ${DISCORD_BOT_TOKEN}`,
+      },
+    })
+
+    if (!userResponse.ok) {
+      const error = await userResponse.text()
+      console.error('Failed to fetch Discord user:', error)
+      return { success: false, error: 'Failed to fetch user' }
     }
+
+    const user = await userResponse.json()
+    // Return display name (global_name) or fallback to username
+    const displayName = user.global_name || user.username
+    return { success: true, displayName, user }
   } catch (error) {
-    console.error('Discord user lookup error:', error)
+    console.error('Discord user fetch error:', error)
     return { success: false, error: error.message }
   }
 }
 
 // Helper function to send Discord DM
-async function sendDiscordDM(discordId: string, username: string, inviteCode: string, inviteName: string) {
+async function sendDiscordDM(discordId: string, displayName: string, inviteCode: string, inviteName: string) {
   if (!DISCORD_BOT_TOKEN) {
     console.warn('Discord bot token not configured, skipping Discord notification')
     return { success: false, error: 'No bot token' }
@@ -63,7 +70,7 @@ async function sendDiscordDM(discordId: string, username: string, inviteCode: st
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        content: `Hey ${username}! 🎉\n\n**${inviteName}** has invited you to [ADOS LA](https://ados.events/)!\n\nYour exclusive invite code: **${inviteCode}**\n\n📍 Location: Mack Sennett studios, 1215 Bates Ave, Los Angeles, CA 90029\n📅 Date: November 7th\n⏰ Morning event: 11am-5pm (panels, roundtables, hangouts)\n⏰ Evening event: 7pm-11pm (show, drinks, frivolities)\n\n**To RSVP:**\n1. Visit https://ados.events/\n2. Sign in and apply for the event\n3. Use your invite code: **${inviteCode}**\n\nSee you there! ✨`,
+        content: `Hey ${displayName},\n\n${inviteName} has invited you to ADOS LA!\n\nCohosted with Asteria at the legendary Mack Sennett studios, we're bringing together artists, creators, and industry professionals to celebrate AI art and open source models.\n\n📍 1215 Bates Ave, Los Angeles, CA 90029\n📅 November 7th\n⏰ Morning: 11am-5pm (panels, roundtables, hangouts)\n⏰ Evening: 7pm-11pm (show, drinks, frivolities)\n\nMore info and RSVP: https://ados.events/?invite=${inviteCode}\n\nWant to contribute? (Show art, host a roundtable, etc.) Let us know when signing up!\n\nWe hope to see you there! ✨`,
       }),
     })
 
@@ -156,9 +163,13 @@ serve(async (req) => {
       )
     }
 
-    // Send Discord DM using the discord_id
-    // We'll use "friend" as placeholder since we don't have their username yet
-    const discordResult = await sendDiscordDM(discordId, 'friend', inviteCode, inviteName)
+    // Fetch current Discord display name
+    console.log(`Fetching Discord user info for ID ${discordId}...`)
+    const userInfo = await getDiscordUser(discordId)
+    const displayName = userInfo.success ? userInfo.displayName : 'friend'
+
+    // Send Discord DM using the discord_id and live-fetched display name
+    const discordResult = await sendDiscordDM(discordId, displayName, inviteCode, inviteName)
     
     if (!discordResult.success) {
       console.error('Failed to send Discord invite:', discordResult.error)

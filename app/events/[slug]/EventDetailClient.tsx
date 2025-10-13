@@ -13,17 +13,16 @@ import type { Event } from '@/lib/types'
 
 interface EventDetailClientProps {
   event: Event
-  isAuthenticated: boolean
-  hasApplied: boolean
 }
 
-export function EventDetailClient({ event, isAuthenticated: initialAuth, hasApplied: initialHasApplied }: EventDetailClientProps) {
+export function EventDetailClient({ event }: EventDetailClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [isAuthenticated] = useState(initialAuth)
-  const [hasApplied] = useState(initialHasApplied)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [hasApplied, setHasApplied] = useState(false)
+  const [isLoadingUserData, setIsLoadingUserData] = useState(true)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [inviteCode, setInviteCode] = useState('')
   const [inviteError, setInviteError] = useState('')
@@ -34,6 +33,33 @@ export function EventDetailClient({ event, isAuthenticated: initialAuth, hasAppl
   useEffect(() => {
     router.prefetch(`/events/${event.slug}/apply`)
   }, [event.slug, router])
+
+  // Fetch user-specific data on client side (non-blocking)
+  useEffect(() => {
+    async function fetchUserData() {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        setIsAuthenticated(true)
+        
+        // Check if user has applied
+        const { data: attendance } = await supabase
+          .from('attendance')
+          .select('*')
+          .eq('event_id', event.id)
+          .eq('user_id', user.id)
+          .single()
+        
+        if (attendance) {
+          setHasApplied(true)
+        }
+      }
+      
+      setIsLoadingUserData(false)
+    }
+    
+    fetchUserData()
+  }, [event.id, supabase])
 
   const handleApplyClick = () => {
     if (isAuthenticated) {
@@ -136,7 +162,12 @@ export function EventDetailClient({ event, isAuthenticated: initialAuth, hasAppl
 
       {/* CTA */}
       <div className="flex flex-col items-center gap-4">
-        {hasApplied ? (
+        {isLoadingUserData ? (
+          // Show a loading state while checking user status
+          <Button size="lg" disabled>
+            Loading...
+          </Button>
+        ) : hasApplied ? (
           <Link href={`/events/${event.slug}/apply`}>
             <Button size="lg">Update Submission</Button>
           </Link>
@@ -239,4 +270,3 @@ export function EventDetailClient({ event, isAuthenticated: initialAuth, hasAppl
     </>
   )
 }
-

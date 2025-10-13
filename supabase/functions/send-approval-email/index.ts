@@ -6,8 +6,37 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 const DISCORD_BOT_TOKEN = Deno.env.get('DISCORD_BOT_TOKEN')
 
+// Helper function to get Discord user info
+async function getDiscordUser(discordId: string) {
+  if (!DISCORD_BOT_TOKEN) {
+    return { success: false, error: 'No bot token' }
+  }
+
+  try {
+    const userResponse = await fetch(`https://discord.com/api/v10/users/${discordId}`, {
+      headers: {
+        'Authorization': `Bot ${DISCORD_BOT_TOKEN}`,
+      },
+    })
+
+    if (!userResponse.ok) {
+      const error = await userResponse.text()
+      console.error('Failed to fetch Discord user:', error)
+      return { success: false, error: 'Failed to fetch user' }
+    }
+
+    const user = await userResponse.json()
+    // Return display name (global_name) or fallback to username
+    const displayName = user.global_name || user.username
+    return { success: true, displayName, user }
+  } catch (error) {
+    console.error('Discord user fetch error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
 // Helper function to send Discord DM
-async function sendDiscordDM(discordId: string, username: string) {
+async function sendDiscordDM(discordId: string, displayName: string) {
   if (!DISCORD_BOT_TOKEN) {
     console.warn('Discord bot token not configured, skipping Discord notification')
     return { success: false, error: 'No bot token' }
@@ -42,7 +71,7 @@ async function sendDiscordDM(discordId: string, username: string) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        content: `Hey ${username}! 🎉\n\nBanodoco is excited to have you joining us for [ADOS LA](https://ados.events/)!\n\n📍 Location: Mack Sennett studios, 1215 Bates Ave, Los Angeles, CA 90029\n📅 Date: November 7th\n⏰ Morning event: 11am-5pm (panels, roundtables, hangouts)\n⏰ Evening event: 7pm-11pm (show, drinks, frivolities)\n\nCheck your email for calendar links and more details. See you there! ✨`,
+        content: `Hey ${displayName}! 🎉\n\nBanodoco is excited to have you joining us for [ADOS LA](https://ados.events/)!\n\n📍 Location: Mack Sennett studios, 1215 Bates Ave, Los Angeles, CA 90029\n📅 Date: November 7th\n⏰ Morning event: 11am-5pm (panels, roundtables, hangouts)\n⏰ Evening event: 7pm-11pm (show, drinks, frivolities)\n\nCheck your email for calendar links and more details. See you there! ✨`,
       }),
     })
 
@@ -248,12 +277,18 @@ serve(async (req) => {
 
     // Send Discord DM if user has Discord connected
     let discordResult = null
-    if (discordId && discordUsername) {
-      console.log(`Sending Discord DM to ${discordUsername}...`)
-      discordResult = await sendDiscordDM(discordId, discordUsername)
+    if (discordId) {
+      console.log(`Fetching Discord user info for ID ${discordId}...`)
+      
+      // Fetch current Discord display name
+      const userInfo = await getDiscordUser(discordId)
+      const displayName = userInfo.success ? userInfo.displayName : (discordUsername || 'friend')
+      
+      console.log(`Sending Discord DM to ${displayName}...`)
+      discordResult = await sendDiscordDM(discordId, displayName)
       
       if (discordResult.success) {
-        console.log(`✅ Discord DM sent successfully to ${discordUsername}`)
+        console.log(`✅ Discord DM sent successfully to ${displayName}`)
       } else {
         console.warn(`⚠️ Failed to send Discord DM: ${discordResult.error}`)
         // Don't fail the request - email was sent successfully

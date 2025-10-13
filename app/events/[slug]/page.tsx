@@ -5,8 +5,8 @@ import Link from 'next/link'
 import type { Event } from '@/lib/types'
 import { EventDetailClient } from './EventDetailClient'
 
-// Force dynamic rendering since we need user-specific data
-export const dynamic = 'force-dynamic'
+// Use ISR for better performance - page is cached and revalidated every 60 seconds
+export const revalidate = 60
 
 interface EventDetailPageProps {
   params: {
@@ -17,18 +17,12 @@ interface EventDetailPageProps {
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
   const supabase = await createClient()
   
-  // Fetch all data on the server in parallel
-  const [userResult, eventResult] = await Promise.all([
-    supabase.auth.getUser(),
-    supabase
-      .from('events')
-      .select('*')
-      .eq('slug', params.slug)
-      .single()
-  ])
-
-  const { data: { user } } = userResult
-  const { data: event, error } = eventResult
+  // Only fetch event data (cacheable, non-user-specific)
+  const { data: event, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('slug', params.slug)
+    .single()
 
   if (error || !event) {
     return (
@@ -46,19 +40,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     )
   }
 
-  // Check if user has applied
-  let hasApplied = false
-  if (user) {
-    const { data: attendance } = await supabase
-      .from('attendance')
-      .select('*')
-      .eq('event_id', event.id)
-      .eq('user_id', user.id)
-      .single()
-    
-    hasApplied = !!attendance
-  }
-
+  // User-specific data is now fetched on the client for better caching
   return (
     <>
       {/* Background Video */}
@@ -105,13 +87,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
           {/* Client Component for Interactive Content */}
           <EventDetailClient 
-            event={event} 
-            isAuthenticated={!!user}
-            hasApplied={hasApplied}
+            event={event}
           />
         </div>
       </div>
     </>
   )
 }
-
