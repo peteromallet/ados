@@ -87,7 +87,7 @@ export function EventDetailClient({ event }: EventDetailClientProps) {
       // Validate invite code against database
       const { data: inviteData, error: inviteError } = await supabase
         .from('invites')
-        .select('id')
+        .select('code, name, used_count, max_uses')
         .eq('code', inviteCode.trim().toUpperCase())
         .maybeSingle()
 
