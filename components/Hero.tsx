@@ -55,83 +55,92 @@ export function Hero() {
     }, 600) // End glitch
   }
 
-  // Check if user is admin and application status
+  // Check if user is admin and application status, but after a short delay
+  // to prioritize initial render and prefetching.
   useEffect(() => {
-    async function checkUserStatus() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-        
-        if (profile?.role === 'admin') {
-          setIsAdmin(true)
-        }
+    const timer = setTimeout(() => {
+      async function checkUserStatus() {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+          
+          if (profile?.role === 'admin') {
+            setIsAdmin(true)
+          }
 
-        // Check if user has applied to the main event (ados-2025)
-        const { data: events } = await supabase
-          .from('events')
-          .select('id')
-          .eq('slug', 'ados-2025')
-          .single()
-
-        if (events) {
-          const { data: attendance } = await supabase
-            .from('attendance')
-            .select('status')
-            .eq('user_id', user.id)
-            .eq('event_id', events.id)
+          // Check if user has applied to the main event (ados-2025)
+          const { data: events } = await supabase
+            .from('events')
+            .select('id')
+            .eq('slug', 'ados-2025')
             .single()
 
-          if (attendance) {
-            setApplicationStatus(attendance.status)
+          if (events) {
+            const { data: attendance } = await supabase
+              .from('attendance')
+              .select('status')
+              .eq('user_id', user.id)
+              .eq('event_id', events.id)
+              .single()
+
+            if (attendance) {
+              setApplicationStatus(attendance.status)
+            }
           }
         }
       }
-    }
-    checkUserStatus()
+      checkUserStatus()
+    }, 1000) // 1-second delay
+
+    return () => clearTimeout(timer)
   }, [supabase])
 
-  // Fetch invite name from database
+  // Fetch invite name from database, but after a short delay.
   useEffect(() => {
-    const inviteCode = searchParams.get('invite')
-    if (inviteCode) {
-      async function fetchInvite() {
-        // Small delay to make the animation more noticeable
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        const { data, error } = await supabase
-          .from('invites')
-          .select('*')
-          .eq('code', inviteCode)
-          .single()
-        
-        if (!error && data) {
-          // Check if invite has uses left
-          if (data.used_count < data.max_uses) {
-            setInviteName(data.name)
-            // Persist to localStorage
-            localStorage.setItem('invite_code', JSON.stringify({
-              code: inviteCode,
-              name: data.name
-            }))
-            // Delay showing the button change until after name animation completes
-            setTimeout(() => {
-              setShowInviteButton(true)
-            }, 1200) // Wait for name animation to complete
+    const timer = setTimeout(() => {
+      const inviteCode = searchParams.get('invite')
+      if (inviteCode) {
+        async function fetchInvite() {
+          // Small delay to make the animation more noticeable is fine here
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
+          const { data, error } = await supabase
+            .from('invites')
+            .select('*')
+            .eq('code', inviteCode)
+            .single()
+          
+          if (!error && data) {
+            // Check if invite has uses left
+            if (data.used_count < data.max_uses) {
+              setInviteName(data.name)
+              // Persist to localStorage
+              localStorage.setItem('invite_code', JSON.stringify({
+                code: inviteCode,
+                name: data.name
+              }))
+              // Delay showing the button change until after name animation completes
+              setTimeout(() => {
+                setShowInviteButton(true)
+              }, 1200) // Wait for name animation to complete
+            } else {
+              // Invite is used up
+              setInvalidInvite(true)
+            }
           } else {
-            // Invite is used up
+            // Invalid invite code
             setInvalidInvite(true)
           }
-        } else {
-          // Invalid invite code
-          setInvalidInvite(true)
         }
+        fetchInvite()
       }
-      fetchInvite()
-    }
+    }, 1000) // 1-second delay
+
+    return () => clearTimeout(timer)
   }, [searchParams, supabase])
 
   // Update video source when vibe changes
@@ -429,7 +438,7 @@ export function Hero() {
                     </p>
                   </motion.div>
                 )}
-                <h1 className={`text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-8 uppercase text-center transition-colors duration-300 ${
+                <h1 className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-8 uppercase text-center transition-colors duration-300 ${
                   vibe === 'epic' ? 'text-black' : 'text-white'
                 }`}>
                   <span className="inline-block tracking-[0.3em] sm:tracking-[0.5em] -mr-[0.3em] sm:-mr-[0.5em]">ADOS</span>
@@ -438,7 +447,7 @@ export function Hero() {
                   key={`subtitle-${vibe}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`text-base sm:text-lg md:text-xl lg:text-2xl mb-4 font-light uppercase text-center transition-colors duration-300 px-2 ${
+                  className={`text-sm sm:text-base md:text-lg lg:text-xl mb-4 font-light uppercase text-center transition-colors duration-300 px-2 ${
                     vibe === 'epic' ? 'text-black' : 'text-white'
                   }`}
                 >
@@ -448,7 +457,7 @@ export function Hero() {
                   key={`date-${vibe}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`text-xs sm:text-sm md:text-base mb-11 font-light uppercase text-center transition-colors duration-300 ${
+                  className={`text-xs sm:text-sm md:text-sm lg:text-base mb-8 font-light uppercase text-center transition-colors duration-300 ${
                     vibe === 'epic' ? 'text-black/70' : 'text-white/70'
                   }`}
                 >
