@@ -27,6 +27,7 @@ export function EventDetailClient({ event }: EventDetailClientProps) {
   const [inviteCode, setInviteCode] = useState('')
   const [inviteError, setInviteError] = useState('')
   const [isSubmittingInvite, setIsSubmittingInvite] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
   const showSuccess = searchParams.get('success') === 'true'
 
   // Prefetch apply route ASAP for faster navigation
@@ -63,6 +64,7 @@ export function EventDetailClient({ event }: EventDetailClientProps) {
 
   const handleApplyClick = () => {
     if (isAuthenticated) {
+      setIsNavigating(true)
       router.push(`/events/${event.slug}/apply`)
     } else {
       setShowAuthModal(true)
@@ -106,6 +108,7 @@ export function EventDetailClient({ event }: EventDetailClientProps) {
 
       // Close modal and redirect to apply page with invite code
       setShowInviteModal(false)
+      setIsNavigating(true)
       router.push(`/events/${event.slug}/apply?invite=${inviteCode.trim().toUpperCase()}`)
     } catch (error) {
       console.error('Error validating invite:', error)
@@ -168,9 +171,16 @@ export function EventDetailClient({ event }: EventDetailClientProps) {
             Loading...
           </Button>
         ) : hasApplied ? (
-          <Link href={`/events/${event.slug}/apply`}>
-            <Button size="lg">Update Submission</Button>
-          </Link>
+          <Button 
+            size="lg" 
+            onClick={() => {
+              setIsNavigating(true)
+              router.push(`/events/${event.slug}/apply`)
+            }}
+            disabled={isNavigating}
+          >
+            {isNavigating ? 'Loading...' : 'Update Submission'}
+          </Button>
         ) : isFull ? (
           <Button size="lg" disabled>
             Event Full
@@ -181,12 +191,14 @@ export function EventDetailClient({ event }: EventDetailClientProps) {
               size="lg" 
               onClick={handleApplyClick}
               onMouseEnter={() => router.prefetch(`/events/${event.slug}/apply`)}
+              disabled={isNavigating}
             >
-              Sign up
+              {isNavigating ? 'Loading...' : 'Sign up'}
             </Button>
             <button
               onClick={handleInviteClick}
               className="text-white/80 hover:text-white transition-colors text-xs sm:text-sm underline"
+              disabled={isNavigating}
             >
               I was invited
             </button>
