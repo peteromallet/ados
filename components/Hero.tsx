@@ -541,7 +541,7 @@ export function Hero() {
                 </div>
 
             {/* Vibe Toggle below info tooltips */}
-            <div className="mt-8">
+            <div className="mt-4">
               <VibeToggle value={vibe} onChange={handleVibeChange} />
             </div>
 
