@@ -26,6 +26,9 @@ export default function AdminPage() {
   const [attendees, setAttendees] = useState<any[]>([])
   const [statusFilter, setStatusFilter] = useState<string>('pending')
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
+  const [bulkInput, setBulkInput] = useState('')
+  const [bulkResults, setBulkResults] = useState<any[]>([])
+  const [isBulkSubmitting, setIsBulkSubmitting] = useState(false)
 
   useEffect(() => {
     async function checkAdmin() {
@@ -205,6 +208,75 @@ export default function AdminPage() {
       }
     } catch (err) {
       console.error('Failed to copy:', err)
+    }
+  }
+
+  const handleBulkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsBulkSubmitting(true)
+    setBulkResults([])
+
+    try {
+      // Parse the CSV input: username,discord_id
+      const lines = bulkInput.trim().split('\n')
+      const results: any[] = []
+
+      for (const line of lines) {
+        if (!line.trim()) continue
+
+        const [username, discord_id] = line.split(',').map(s => s.trim())
+        
+        if (!username || !discord_id) {
+          results.push({ 
+            name: username || 'Unknown', 
+            success: false, 
+            error: 'Invalid format. Expected: username,discord_id' 
+          })
+          continue
+        }
+
+        // Generate code from username
+        const code = username.toUpperCase().replace(/[^A-Z0-9]/g, '') + Math.random().toString(36).substring(2, 4).toUpperCase()
+
+        // Create the invite
+        const { error: inviteError } = await supabase
+          .from('invites')
+          .insert({
+            code,
+            name: username,
+            max_uses: 1,
+            used_count: 0,
+            discord_id,
+          })
+
+        if (inviteError) {
+          results.push({ 
+            name: username, 
+            success: false, 
+            error: inviteError.message 
+          })
+        } else {
+          results.push({ 
+            name: username, 
+            code,
+            success: true,
+            url: `${window.location.origin}/?invite=${code}`
+          })
+        }
+      }
+
+      setBulkResults(results)
+      await loadInvites()
+      
+      // Clear input if all successful
+      if (results.every(r => r.success)) {
+        setBulkInput('')
+      }
+    } catch (err) {
+      console.error('Error creating bulk invites:', err)
+      setError('Failed to create bulk invites')
+    } finally {
+      setIsBulkSubmitting(false)
     }
   }
 
