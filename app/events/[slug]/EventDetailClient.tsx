@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Event } from '@/lib/types'
 
 interface EventDetailClientProps {
-  event: Event
+  event: Pick<Event, 'id' | 'slug'>
 }
 
 export function EventDetailClient({ event }: EventDetailClientProps) {

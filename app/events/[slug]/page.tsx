@@ -1,7 +1,6 @@
 import { formatDate } from '@/lib/utils'
 import { Calendar, MapPin, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import type { Event } from '@/lib/types'
 import { EventDetailClient } from './EventDetailClient'
 
 // Use ISR for better performance - page is cached and revalidated every 60 seconds
