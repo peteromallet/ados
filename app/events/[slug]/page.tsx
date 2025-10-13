@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server'
 import { formatDate } from '@/lib/utils'
 import { Calendar, MapPin, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -15,12 +14,17 @@ interface EventDetailPageProps {
 }
 
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
-  const supabase = await createClient()
+  // Use direct Supabase client for public data (no cookies needed, faster)
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
   
-  // Only fetch event data (cacheable, non-user-specific)
+  // Only fetch fields we actually use for maximum speed
   const { data: event, error } = await supabase
     .from('events')
-    .select('*')
+    .select('id, slug, name, date, location')
     .eq('slug', params.slug)
     .single()
 
