@@ -54,20 +54,23 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   // Protected routes (apply pages now handle auth with modal)
   const protectedRoutes = ['/dashboard']
   const isProtectedRoute = protectedRoutes.some(route => 
     new RegExp(route).test(request.nextUrl.pathname)
   )
 
-  if (isProtectedRoute && !user) {
-    const redirectUrl = new URL('/auth/signin', request.url)
-    redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
-    return NextResponse.redirect(redirectUrl)
+  // Only check auth if this is a protected route
+  if (isProtectedRoute) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      const redirectUrl = new URL('/auth/signin', request.url)
+      redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
   }
 
   return response
