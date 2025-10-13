@@ -27,6 +27,12 @@ export function Hero() {
   const [applicationStatus, setApplicationStatus] = useState<string | null>(null)
   const supabase = createClient()
 
+  // Prefetch event page as soon as Hero loads for instant navigation
+  useEffect(() => {
+    router.prefetch('/events/ados-2025')
+    router.prefetch('/events/ados-2025/apply')
+  }, [router])
+
   const handleVibeChange = (newVibe: 'chill' | 'epic') => {
     if (newVibe === vibe) return
     
