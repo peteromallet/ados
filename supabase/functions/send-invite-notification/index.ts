@@ -70,7 +70,7 @@ async function sendDiscordDM(discordId: string, displayName: string, inviteCode:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        content: `Hey ${displayName},\n\n${inviteName} has invited you to ADOS LA!\n\nCohosted with Asteria at the legendary Mack Sennett studios, we're bringing together artists, creators, and industry professionals to celebrate AI art and open source models.\n\n📍 1215 Bates Ave, Los Angeles, CA 90029\n📅 November 7th\n⏰ Morning: 11am-5pm (panels, roundtables, hangouts)\n⏰ Evening: 7pm-11pm (show, drinks, frivolities)\n\nMore info and RSVP: https://ados.events/?invite=${inviteCode}\n\nWant to contribute? (Show art, host a roundtable, etc.) Let us know when signing up!\n\nWe hope to see you there! ✨`,
+        content: `Hey ${displayName},\n\n${inviteName} has invited you to ADOS LA!\n\nCohosted with Asteria at the legendary Mack Sennett studios, we're bringing together artists, creators, and industry professionals to celebrate AI art and open source models.\n\n📍 1215 Bates Ave, Los Angeles, CA 90029\n📅 November 7th\n⏰ Morning: 11am-5pm (panels, roundtables, hangouts)\n⏰ Evening: 7pm-11pm (show, drinks, frivolities)\n\nMore info and RSVP: https://ados.events/?invite=${inviteCode}\n\nWant to contribute? (Show art, host a roundtable, etc.) Let us know when signing up!\n\nWe hope to see you there! ✨\n\nPS: if you'd like to bring a +1, or refer someone else, your invite code is good for 2!`,
       }),
     })
 
