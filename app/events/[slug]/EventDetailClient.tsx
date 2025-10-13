@@ -45,10 +45,10 @@ export function EventDetailClient({ event }: EventDetailClientProps) {
         // Check if user has applied
         const { data: attendance } = await supabase
           .from('attendance')
-          .select('*')
+          .select('id')
           .eq('event_id', event.id)
           .eq('user_id', user.id)
-          .single()
+          .maybeSingle()
         
         if (attendance) {
           setHasApplied(true)
@@ -87,9 +87,9 @@ export function EventDetailClient({ event }: EventDetailClientProps) {
       // Validate invite code against database
       const { data: inviteData, error: inviteError } = await supabase
         .from('invites')
-        .select('*')
+        .select('id')
         .eq('code', inviteCode.trim().toUpperCase())
-        .single()
+        .maybeSingle()
 
       if (inviteError || !inviteData) {
         setInviteError('Invalid invite code')
