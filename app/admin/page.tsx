@@ -263,6 +263,10 @@ export default function AdminPage() {
             url: `${window.location.origin}/?invite=${code}`
           })
         }
+
+        // Add 200ms delay between invites to respect Discord API rate limits
+        // This allows ~5 invites per second, well within Discord's limits
+        await new Promise(resolve => setTimeout(resolve, 200))
       }
 
       setBulkResults(results)
@@ -409,6 +413,67 @@ export default function AdminPage() {
                     </>
                   )}
                 </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bulk Invite Creation */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Bulk Create Invites</h2>
+          <form onSubmit={handleBulkSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Paste CSV (username,discord_id)
+              </label>
+              <textarea
+                value={bulkInput}
+                onChange={(e) => setBulkInput(e.target.value)}
+                placeholder={'voxJT,240166269607870464\nhuemin,474070326192504842\nhu,978367254431408142'}
+                className="w-full h-48 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-mono text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                One per line. Format: username,discord_id (will send Discord invites automatically)
+              </p>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isBulkSubmitting || !bulkInput.trim()}
+              size="lg"
+              className="w-full"
+            >
+              {isBulkSubmitting ? 'Creating Invites...' : 'Create Bulk Invites'}
+            </Button>
+          </form>
+
+          {bulkResults.length > 0 && (
+            <div className="mt-8 space-y-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Results ({bulkResults.filter(r => r.success).length}/{bulkResults.length} successful)
+              </h3>
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {bulkResults.map((result, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-lg text-sm ${
+                      result.success
+                        ? 'bg-green-50 border border-green-200 text-green-900'
+                        : 'bg-red-50 border border-red-200 text-red-900'
+                    }`}
+                  >
+                    <div className="font-semibold">
+                      {result.success ? '✓' : '✗'} {result.name}
+                    </div>
+                    {result.success ? (
+                      <div className="text-xs mt-1">
+                        Code: {result.code} • Discord invite sent
+                      </div>
+                    ) : (
+                      <div className="text-xs mt-1">{result.error}</div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}
