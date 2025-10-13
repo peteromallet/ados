@@ -16,7 +16,7 @@ interface ApplyClientProps {
 export default function ApplyClient({ event: initialEvent }: ApplyClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [event, setEvent] = useState<EventWithDetails | null>(initialEvent)
+  const [event, setEvent] = useState<EventWithDetails>(initialEvent)
   const [loading, setLoading] = useState(true) // Still need loading for user-specific data
   const [error, setError] = useState<string | null>(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -28,6 +28,11 @@ export default function ApplyClient({ event: initialEvent }: ApplyClientProps) {
 
   useEffect(() => {
     async function checkAuthAndLoadUserData() {
+      // Guard clause to ensure event is not null
+      if (!event) {
+        return
+      }
+
       try {
         // The event data is already passed as a prop, so we don't need to fetch it here.
         // We only need to fetch user-specific data.
@@ -130,7 +135,7 @@ export default function ApplyClient({ event: initialEvent }: ApplyClientProps) {
     checkAuthAndLoadUserData()
   }, [searchParams, supabase, event])
 
-  const handleSubmit = async (answers: Record<string, string>) => {
+  const handleSubmit = async (answers: { question_id: string; answer_text: string }[]) => {
     // Prevent duplicate submissions
     if (isSubmitting) {
       console.log('⚠️ Submission already in progress, ignoring duplicate click')
@@ -146,6 +151,19 @@ export default function ApplyClient({ event: initialEvent }: ApplyClientProps) {
         throw new Error('User not authenticated or event not loaded')
       }
 
+      // Filter out duplicate question_ids (keep the last one if duplicates exist)
+      const uniqueAnswers = answers.reduce((acc, answer) => {
+        const existingIndex = acc.findIndex(a => a.question_id === answer.question_id)
+        if (existingIndex >= 0) {
+          acc[existingIndex] = answer // Replace with latest
+        } else {
+          acc.push(answer)
+        }
+        return acc
+      }, [] as typeof answers)
+
+      console.log('Submitting answers:', uniqueAnswers)
+
       // Check if attendance record already exists
       const { data: existingAttendance } = await supabase
         .from('attendance')
@@ -160,14 +178,26 @@ export default function ApplyClient({ event: initialEvent }: ApplyClientProps) {
         // Update existing submission
         attendanceId = existingAttendance.id
 
+        console.log('Deleting old answers for attendance_id:', attendanceId)
+
         // Delete old answers
-        await supabase
+        const { data: deletedData, error: deleteError, count } = await supabase
           .from('answers')
           .delete()
           .eq('attendance_id', attendanceId)
+          .select()
+
+        console.log('Delete result:', { deletedData, deleteError, count })
+
+        if (deleteError) {
+          console.error('Error deleting old answers:', deleteError)
+          throw deleteError
+        }
+
+        console.log('Inserting new answers:', uniqueAnswers)
 
         // Insert new answers
-        const answerInserts = Object.entries(answers).map(([question_id, answer_text]) => ({
+        const answerInserts = uniqueAnswers.map(({ question_id, answer_text }) => ({
           attendance_id: attendanceId,
           question_id: question_id,
           answer_text: answer_text,
@@ -196,7 +226,7 @@ export default function ApplyClient({ event: initialEvent }: ApplyClientProps) {
         attendanceId = attendance.id
 
         // Create answer records
-        const answerInserts = Object.entries(answers).map(([question_id, answer_text]) => ({
+        const answerInserts = uniqueAnswers.map(({ question_id, answer_text }) => ({
           attendance_id: attendanceId,
           question_id: question_id,
           answer_text: answer_text,
@@ -234,8 +264,8 @@ export default function ApplyClient({ event: initialEvent }: ApplyClientProps) {
     <>
       <AuthModal
         isOpen={showAuthModal}
-        onClose={() => router.push(`/events/${event?.slug}`)}
-        redirectTo={`/events/${event?.slug}/apply`}
+        onClose={() => router.push(`/events/${event.slug}`)}
+        redirectTo={`/events/${event.slug}/apply`}
       />
       
       <div className="relative min-h-screen overflow-hidden">

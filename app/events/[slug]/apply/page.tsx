@@ -10,7 +10,7 @@ interface ApplyPageProps {
 }
 
 async function getEventWithQuestions(slug: string): Promise<EventWithDetails | null> {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: eventData, error: eventError } = await supabase
         .from('events')
         .select(`
