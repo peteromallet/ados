@@ -589,8 +589,8 @@ export default function AdminPage() {
                     </div>
                   </div>
                   
-                  {/* Show answers for pending applications - Full width below */}
-                  {attendee.status === 'pending' && attendee.answers && attendee.answers.length > 0 && (
+                  {/* Show answers for pending and approved applications - Full width below */}
+                  {(attendee.status === 'pending' || attendee.status === 'approved') && attendee.answers && attendee.answers.length > 0 && (
                     <div className="pt-4 border-t border-gray-200">
                       <h4 className="text-sm font-semibold text-gray-700 mb-3">Responses:</h4>
                       <div className="space-y-3">
