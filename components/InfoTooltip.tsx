@@ -97,48 +97,35 @@ export function InfoTooltip({ trigger, content, isDark = false, arrowPosition = 
           onClick={() => setIsOpen(!isOpen)}
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
-          className={`transition-colors text-sm uppercase tracking-wide border-b pb-1 whitespace-nowrap ${
+          className={`transition-colors duration-300 text-sm uppercase tracking-wide border-b pb-1 whitespace-nowrap ${
             isDark 
-              ? 'text-black/80 hover:text-black border-black/40 hover:border-black' 
+              ? 'text-black/80 hover:text-black border-black/40 hover:border-black lg:text-amber-200/80 lg:hover:text-amber-100 lg:border-amber-300/40 lg:hover:border-amber-300' 
               : 'text-white/80 hover:text-white border-white/40 hover:border-white'
           }`}
         >
           {trigger}
         </button>
         
-        {/* Desktop tooltip - positioned above trigger */}
+        {/* Desktop tooltip - positioned to the top right */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, x: -10, y: 10 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              exit={{ opacity: 0, x: -10, y: 10 }}
               transition={{ duration: 0.2 }}
-              className={`hidden md:block absolute bottom-full mb-3 backdrop-blur-sm p-4 rounded-lg text-sm text-left whitespace-pre-line z-50 w-64 ${
+              className={`hidden md:block absolute left-full bottom-full backdrop-blur-sm p-4 rounded-lg text-sm text-left whitespace-pre-line z-50 w-64 ${
                 isDark
-                  ? 'bg-white/90 text-black border border-black/20'
+                  ? 'bg-amber-950/90 text-amber-50 border border-amber-500/30 shadow-xl shadow-amber-900/20'
                   : 'bg-black/90 text-white border border-white/20'
               }`}
               style={{
-                left: '50%',
-                marginLeft: '-8rem', // Half of w-64 (16rem / 2 = 8rem)
+                marginLeft: '-0.25rem',
+                marginBottom: '0.25rem',
               }}
               onClick={(e) => e.stopPropagation()}
             >
               {content}
-              <div 
-                className={`absolute top-full w-3 h-3 ${
-                  isDark
-                    ? 'bg-white/90 border-r border-b border-black/20'
-                    : 'bg-black/90 border-r border-b border-white/20'
-                }`}
-                style={{
-                  left: '50%',
-                  marginLeft: '-6px',
-                  marginTop: '-6px',
-                  transform: 'rotate(45deg)',
-                }}
-              ></div>
             </motion.div>
           )}
         </AnimatePresence>

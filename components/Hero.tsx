@@ -208,7 +208,59 @@ export function Hero() {
   }
 
   return (
-    <div className="relative h-[100dvh] flex items-center justify-center overflow-hidden">
+    <div className="relative h-[100dvh] overflow-hidden">
+      {/* Cinema Background with Texture */}
+      <motion.div 
+        className="absolute inset-0 transition-all duration-700"
+        animate={{ 
+          background: vibe === 'epic' 
+            ? 'radial-gradient(ellipse at 70% 50%, #3d2817 0%, #1a0d08 40%, #0a0503 100%)'
+            : 'radial-gradient(ellipse at 70% 50%, #1a1a2e 0%, #0f0f1a 40%, #050508 100%)'
+        }}
+      />
+      
+      {/* Subtle noise texture overlay */}
+      <div 
+        className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
+        style={{
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
+        }}
+      />
+      
+      {/* Ambient wall lighting from screen */}
+          <motion.div
+        className="absolute inset-0 pointer-events-none"
+            animate={{
+          opacity: [0.15, 0.25, 0.15],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut"
+            }}
+            style={{ 
+              background: vibe === 'epic' 
+            ? 'radial-gradient(ellipse 1000px 800px at 70% 50%, rgba(217,119,6,0.15) 0%, transparent 50%)'
+            : 'radial-gradient(ellipse 1000px 800px at 70% 50%, rgba(30,64,175,0.12) 0%, transparent 50%)'
+        }}
+      />
+      
+      {/* Floor reflection subtle effect */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+            style={{ 
+          background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)',
+        }}
+      />
+      
+      {/* Subtle vignette for depth */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+                style={{
+          background: 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 0%, transparent 60%, rgba(0,0,0,0.3) 100%)',
+        }}
+      />
+
       {/* Admin Button */}
       {isAdmin && (
         <Link href="/admin">
@@ -217,142 +269,159 @@ export function Hero() {
           </button>
         </Link>
       )}
-      {/* Background Video */}
-      {/* Visible Background Video */}
-      <motion.video
-        ref={videoRef}
+
+      {/* Mobile: Full Screen Layout */}
+      <div className="lg:hidden relative h-full flex items-center justify-center">
+        {/* Mobile Background Video */}
+        <video
         autoPlay
         loop
         muted
         playsInline
         poster={vibe === 'epic' ? '/epic-hero-poster.jpg' : '/chill-hero-poster.jpg'}
-        initial={{ opacity: 0, scale: 1.1 }}
-        animate={{ 
-          opacity: 1,
-          scale: isGlitching ? [1, 1.05, 0.95, 1] : 1,
-          rotate: isGlitching ? (rotationDirection === 'right' ? [0, 1, -1, 0] : [0, -1, 1, 0]) : 0,
-        }}
-        transition={{ duration: isGlitching ? 0.6 : 0.5 }}
         className="absolute inset-0 w-full h-full object-cover"
-        style={{
-          filter: isGlitching ? `blur(8px) saturate(2) hue-rotate(${rotationDirection === 'right' ? 30 : -30}deg)` : 'none',
-        }}
       >
         <source src={vibe === 'epic' ? '/epic-hero.mp4' : '/chill-hero.mp4'} type="video/mp4" />
-      </motion.video>
-
-      {/* Hidden preload video for the inactive vibe */}
-      <video
-        ref={preloadVideoRef}
-        loop
-        muted
-        playsInline
-        preload="auto"
-        className="hidden"
-        src={vibe === 'epic' ? '/chill-hero.mp4' : '/epic-hero.mp4'}
-      />
-
-      {/* Overlay */}
+        </video>
+        
+        {/* Mobile Overlay */}
       <div className={`absolute inset-0 ${vibe === 'epic' ? 'bg-white/20' : 'bg-black/30'}`} />
 
-      {/* Kaleidoscope Vortex Overlay */}
-      {isGlitching && (
-        <>
-          {/* Gentle center flash */}
+        {/* Mobile Content */}
           <motion.div
-            className="absolute inset-0 z-20 pointer-events-none"
-            animate={{
-              opacity: [0, 0.4, 0],
-            }}
-            style={{ 
-              background: vibe === 'epic' 
-                ? 'radial-gradient(circle at 50% 50%, rgba(255,200,150,0.5) 0%, transparent 35%)'
-                : 'radial-gradient(circle at 50% 50%, rgba(150,200,255,0.4) 0%, transparent 35%)',
-              mixBlendMode: 'screen' 
-            }}
-            transition={{ duration: 0.3 }}
-          />
-
-          {/* Subtle edge vignette pulse */}
-          <motion.div
-            className="absolute inset-0 z-20 pointer-events-none"
-            animate={{
-              opacity: [0, 0.6, 0],
-            }}
-            style={{ 
-              background: 'radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%)',
-            }}
-            transition={{ duration: 0.6 }}
-          />
-
-          {/* Radial gradient pulses */}
-          {[0, 1, 2, 3].map((i) => {
-            const multiplier = rotationDirection === 'right' ? 1 : -1
-            const pulseColor = vibe === 'epic' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)'
-            return (
-              <motion.div
-                key={i}
-                className="absolute inset-0 z-20 pointer-events-none"
-                style={{
-                  background: `radial-gradient(circle at 50% 50%, transparent ${20 + i * 15}%, ${pulseColor} ${25 + i * 15}%, transparent ${30 + i * 15}%)`,
-                  mixBlendMode: 'overlay',
-                }}
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0, 0.8, 0],
-                  rotate: [0, 180 * multiplier * (i % 2 ? 1 : -1), 360 * multiplier * (i % 2 ? 1 : -1)],
-                }}
-                transition={{ duration: 0.6, delay: i * 0.05 }}
-              />
-            )
-          })}
-          
-          {/* Kaleidoscope mirror effect */}
-          <motion.div
-            className="absolute inset-0 z-20 pointer-events-none"
-            style={{
-              background: vibe === 'epic' 
-                ? 'conic-gradient(from 0deg, transparent 0deg, rgba(255,0,0,0.4) 60deg, transparent 120deg, rgba(255,128,0,0.4) 180deg, transparent 240deg, rgba(255,255,0,0.4) 300deg, transparent 360deg)'
-                : 'conic-gradient(from 0deg, transparent 0deg, rgba(255,100,255,0.3) 60deg, transparent 120deg, rgba(100,255,255,0.3) 180deg, transparent 240deg, rgba(255,255,100,0.3) 300deg, transparent 360deg)',
-              mixBlendMode: 'screen',
-            }}
-            animate={{
-              rotate: rotationDirection === 'right' ? [0, 720] : [0, -720],
-              scale: [1, 1.2, 1],
-              opacity: [0, 1, 0],
-            }}
+          className="relative z-10 w-full flex flex-col justify-center items-center text-center px-6"
+          animate={isGlitching ? {
+            scale: [1, 0.95, 1.02, 1],
+            rotateZ: rotationDirection === 'right' ? [0, -2, 2, 0] : [0, 2, -2, 0],
+          } : {}}
             transition={{ duration: 0.6, ease: "easeInOut" }}
-          />
-          
-          {/* Prismatic color burst */}
+        >
           <motion.div
-            className="absolute inset-0 z-20 pointer-events-none"
-            animate={{
-              background: vibe === 'epic' 
-                ? [
-                    'radial-gradient(circle at 50% 50%, rgba(255,50,0,0.5) 0%, transparent 30%)',
-                    'radial-gradient(circle at 50% 50%, rgba(255,128,0,0.5) 0%, transparent 50%)',
-                    'radial-gradient(circle at 50% 50%, rgba(255,200,0,0.5) 0%, transparent 30%)',
-                    'radial-gradient(circle at 50% 50%, transparent 0%, transparent 30%)',
-                  ]
-                : [
-                    'radial-gradient(circle at 50% 50%, rgba(255,0,255,0.4) 0%, transparent 30%)',
-                    'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.4) 0%, transparent 50%)',
-                    'radial-gradient(circle at 50% 50%, rgba(255,255,0,0.4) 0%, transparent 30%)',
-                    'radial-gradient(circle at 50% 50%, transparent 0%, transparent 30%)',
-                  ],
-              scale: [0.5, 2, 0.5],
-              opacity: [0, 0.8, 0],
-            }}
-            style={{ mixBlendMode: 'screen' }}
-            transition={{ duration: 0.6 }}
-          />
-        </>
-      )}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="flex flex-col items-center w-full max-w-xl"
+          >
+            {inviteName && (
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ 
+                  duration: 0.8, 
+                  ease: [0.16, 1, 0.3, 1],
+                  delay: 0.1
+                }}
+                className="mb-4 relative"
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  className={`absolute bottom-0 left-0 h-[2px] ${
+                    vibe === 'epic' ? 'bg-amber-500/50' : 'bg-white/30'
+                  }`}
+                />
+                <p className={`text-sm font-light uppercase tracking-wider px-4 pb-2 ${
+                  vibe === 'epic' ? 'text-amber-500/70' : 'text-white/70'
+                }`}>
+                  An Invitation To{' '}
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.5 }}
+                    className="font-semibold"
+                  >
+                    {inviteName}
+                  </motion.span>
+                </p>
+              </motion.div>
+            )}
+            
+            <h1 className={`text-5xl sm:text-6xl md:text-7xl font-black mb-6 uppercase transition-colors duration-300 ${
+              vibe === 'epic' ? 'text-black' : 'text-white'
+            }`}>
+              <span className="inline-block tracking-[0.5em] -mr-[0.5em]">ADOS</span>
+            </h1>
+            
+            <motion.p 
+              key={`subtitle-mobile-${vibe}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className={`text-sm mb-3 font-light uppercase transition-colors duration-300 ${
+                vibe === 'epic' ? 'text-black' : 'text-white'
+              }`}
+            >
+              <span className="inline-block tracking-[0.2em] -mr-[0.2em]">{content[vibe].subtitle}</span>
+            </motion.p>
+            
+            <motion.p
+              key={`date-mobile-${vibe}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className={`text-xs mb-8 font-light uppercase transition-colors duration-300 ${
+                vibe === 'epic' ? 'text-black/70' : 'text-white/70'
+              }`}
+            >
+              <span className="inline-block tracking-[0.25em] -mr-[0.25em]">{content[vibe].date}</span>
+            </motion.p>
+            
+            <div className="flex flex-col gap-5 items-center w-full">
+              <Link 
+                href={inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : getCtaLink()}
+              >
+                <Button size="lg" className="min-w-[200px]" isDark={vibe === 'epic'}>
+                  {content[vibe].cta}
+                </Button>
+              </Link>
+              
+              {/* Hide on desktop, show on mobile */}
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className={`lg:hidden flex items-center gap-2 transition-colors text-sm uppercase tracking-wide ${
+                  vibe === 'epic' ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-300'
+                }`}
+              >
+                <Play size={20} />
+                <span>{content[vibe].watchTrailer}</span>
+              </button>
 
-      {/* Content */}
+              <div className="flex items-center gap-4 mt-2 flex-wrap justify-center">
+                <InfoTooltip
+                  trigger={vibe === 'epic' ? 'Purpose' : 'Why'}
+                  content={content[vibe].whyGather}
+                  isDark={vibe === 'epic'}
+                  arrowPosition="left"
+                />
+                <span className={vibe === 'epic' ? 'text-black/40' : 'text-white/40'}>|</span>
+                <InfoTooltip
+                  trigger={vibe === 'epic' ? 'Vision' : 'What'}
+                  content={content[vibe].whatIsIt}
+                  isDark={vibe === 'epic'}
+                  arrowPosition="center"
+                />
+                <span className={vibe === 'epic' ? 'text-black/40' : 'text-white/40'}>|</span>
+                <InfoTooltip
+                  trigger={vibe === 'epic' ? 'Group' : 'Who'}
+                  content={content[vibe].whoIsItFor}
+                  isDark={vibe === 'epic'}
+                  arrowPosition="right"
+                />
+              </div>
+
+              <div className="mt-2">
+                <VibeToggle value={vibe} onChange={handleVibeChange} />
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Desktop: Cinema Layout */}
+      <div className="hidden lg:flex relative h-full flex-row items-center justify-center gap-12 px-12">
+        
+        {/* Left Content Area - 40% */}
       <motion.div 
-        className="relative z-10 text-center px-6 w-full"
+          className="relative z-10 w-[40%] flex flex-col justify-center items-start text-left pl-16"
         animate={isGlitching ? {
           scale: [1, 0.95, 1.02, 1],
           rotateZ: rotationDirection === 'right' ? [0, -2, 2, 0] : [0, 2, -2, 0],
@@ -368,9 +437,8 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex flex-col items-center w-full"
+            className="flex flex-col items-center lg:items-start w-full max-w-xl"
         >
-              <div className="w-full max-w-5xl flex flex-col items-center px-4">
                 {inviteName && (
                   <motion.div
                     initial={{ opacity: 0, y: -20, scale: 0.9 }}
@@ -387,11 +455,11 @@ export function Hero() {
                       animate={{ width: '100%' }}
                       transition={{ duration: 0.6, delay: 0.3 }}
                       className={`absolute bottom-0 left-0 h-[2px] ${
-                        vibe === 'epic' ? 'bg-black/30' : 'bg-white/30'
+                    vibe === 'epic' ? 'bg-amber-500/50' : 'bg-white/30'
                       }`}
                     />
-                    <p className={`text-sm sm:text-base md:text-lg font-light uppercase text-center tracking-wider px-4 pb-2 ${
-                      vibe === 'epic' ? 'text-black/70' : 'text-white/70'
+                <p className={`text-sm sm:text-base font-light uppercase tracking-wider px-4 pb-2 ${
+                  vibe === 'epic' ? 'text-amber-500/70' : 'text-white/70'
                     }`}>
                       An Invitation To{' '}
                       <motion.span
@@ -421,11 +489,11 @@ export function Hero() {
                       animate={{ width: '100%' }}
                       transition={{ duration: 0.6, delay: 0.3 }}
                       className={`absolute bottom-0 left-0 h-[2px] ${
-                        vibe === 'epic' ? 'bg-black/30' : 'bg-white/30'
+                    vibe === 'epic' ? 'bg-amber-500/50' : 'bg-white/30'
                       }`}
                     />
-                    <p className={`text-sm sm:text-base md:text-lg font-light uppercase text-center tracking-wider px-4 pb-2 ${
-                      vibe === 'epic' ? 'text-black/70' : 'text-white/70'
+                <p className={`text-sm sm:text-base font-light uppercase tracking-wider px-4 pb-2 ${
+                  vibe === 'epic' ? 'text-amber-500/70' : 'text-white/70'
                     }`}>
                       <motion.span
                         initial={{ opacity: 0 }}
@@ -438,37 +506,59 @@ export function Hero() {
                     </p>
                   </motion.div>
                 )}
-                <h1 className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-8 uppercase text-center transition-colors duration-300 ${
-                  vibe === 'epic' ? 'text-black' : 'text-white'
-                }`}>
-                  <span className="inline-block tracking-[0.3em] sm:tracking-[0.5em] -mr-[0.3em] sm:-mr-[0.5em]">ADOS</span>
+            
+            <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 uppercase transition-colors duration-300 ${
+              vibe === 'epic' ? 'text-amber-500' : 'text-white'
+            }`} style={{
+              textShadow: vibe === 'epic' 
+                ? '0 0 40px rgba(251,191,36,0.3), 0 0 80px rgba(251,191,36,0.2)'
+                : '0 0 40px rgba(255,255,255,0.2), 0 0 80px rgba(255,255,255,0.1)',
+              letterSpacing: '0.5em',
+              fontWeight: 900
+            }}>
+              <span className="inline-block -mr-[0.5em]">ADOS</span>
                 </h1>
+            
                 <motion.p 
                   key={`subtitle-${vibe}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`text-sm sm:text-base md:text-lg lg:text-xl mb-4 font-light uppercase text-center transition-colors duration-300 px-2 ${
-                    vibe === 'epic' ? 'text-black' : 'text-white'
-                  }`}
-                >
-                  <span className="inline-block tracking-[0.1em] sm:tracking-[0.2em] -mr-[0.1em] sm:-mr-[0.2em]">{content[vibe].subtitle}</span>
+              className={`text-sm sm:text-base md:text-lg mb-6 font-light uppercase transition-colors duration-300 ${
+                vibe === 'epic' ? 'text-amber-200/90' : 'text-white/90'
+              }`}
+              style={{
+                letterSpacing: '0.2em',
+                textShadow: vibe === 'epic' 
+                  ? '0 0 20px rgba(251,191,36,0.2)'
+                  : '0 0 20px rgba(255,255,255,0.15)',
+                fontWeight: 300
+              }}
+            >
+              <span className="inline-block -mr-[0.2em]">{content[vibe].subtitle}</span>
                 </motion.p>
+            
                 <motion.p
                   key={`date-${vibe}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`text-xs sm:text-sm md:text-sm lg:text-base mb-8 font-light uppercase text-center transition-colors duration-300 ${
-                    vibe === 'epic' ? 'text-black/70' : 'text-white/70'
-                  }`}
-                >
-                  <span className="inline-block tracking-[0.1em] sm:tracking-[0.2em] -mr-[0.1em] sm:-mr-[0.2em]">{content[vibe].date}</span>
+              className={`text-xs sm:text-sm mb-7 font-light uppercase transition-colors duration-300 ${
+                vibe === 'epic' ? 'text-amber-200/70' : 'text-white/70'
+              }`}
+              style={{
+                letterSpacing: '0.25em',
+                textShadow: vibe === 'epic' 
+                  ? '0 0 15px rgba(251,191,36,0.15)'
+                  : '0 0 15px rgba(255,255,255,0.1)',
+                fontWeight: 300
+              }}
+            >
+              <span className="inline-block -mr-[0.25em]">{content[vibe].date}</span>
                 </motion.p>
-              </div>
-          <div className="flex flex-col gap-6 items-center">
+
+            <div className="flex flex-col gap-5 items-center lg:items-start w-full">
             <Link 
               href={inviteName ? `/events/ados-2025/apply?invite=${searchParams.get('invite')}` : getCtaLink()}
               onMouseEnter={() => {
-                // Prefetch the event page
                 router.prefetch('/events/ados-2025')
               }}
             >
@@ -483,7 +573,7 @@ export function Hero() {
                     scale: [1, 1.05, 1],
                     boxShadow: [
                       'none',
-                      vibe === 'epic' ? '0 0 20px rgba(0,0,0,0.3)' : '0 0 20px rgba(255,255,255,0.3)',
+                        vibe === 'epic' ? '0 0 20px rgba(251,191,36,0.5)' : '0 0 20px rgba(255,255,255,0.3)',
                       'none'
                     ]
                   } : {}}
@@ -496,13 +586,14 @@ export function Hero() {
               </motion.div>
             </Link>
             
+              {/* Hide on desktop, show on mobile */}
                 <motion.button
                   key={`trailer-${vibe}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   onClick={() => setIsModalOpen(true)}
-                  className={`flex items-center gap-2 transition-colors text-sm uppercase tracking-wide group ${
-                    vibe === 'epic' ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-300'
+                className={`lg:hidden flex items-center gap-2 transition-colors text-sm uppercase tracking-wide group ${
+                  vibe === 'epic' ? 'text-amber-200 hover:text-amber-100' : 'text-white hover:text-gray-300'
                   }`}
                 >
                   <motion.div
@@ -517,64 +608,549 @@ export function Hero() {
                   <span>{content[vibe].watchTrailer}</span>
                 </motion.button>
 
-                <div className="flex items-center gap-6 mt-2">
+              <motion.div 
+                className="flex items-center gap-6 mt-2"
+                key={`tooltips-${vibe}`}
+              >
                   <InfoTooltip
                     trigger={vibe === 'epic' ? 'Purpose' : 'Why'}
                     content={content[vibe].whyGather}
                     isDark={vibe === 'epic'}
                     arrowPosition="left"
                   />
-                  <span className={vibe === 'epic' ? 'text-black/40' : 'text-white/40'}>|</span>
+                <motion.span 
+                  className={`transition-colors duration-300 ${vibe === 'epic' ? 'text-amber-300/40' : 'text-white/40'}`}
+                  animate={{
+                    color: vibe === 'epic' ? 'rgba(252, 211, 77, 0.4)' : 'rgba(255, 255, 255, 0.4)'
+                  }}
+                >|</motion.span>
                   <InfoTooltip
                     trigger={vibe === 'epic' ? 'Vision' : 'What'}
                     content={content[vibe].whatIsIt}
                     isDark={vibe === 'epic'}
                     arrowPosition="center"
                   />
-                  <span className={vibe === 'epic' ? 'text-black/40' : 'text-white/40'}>|</span>
+                <motion.span 
+                  className={`transition-colors duration-300 ${vibe === 'epic' ? 'text-amber-300/40' : 'text-white/40'}`}
+                  animate={{
+                    color: vibe === 'epic' ? 'rgba(252, 211, 77, 0.4)' : 'rgba(255, 255, 255, 0.4)'
+                  }}
+                >|</motion.span>
                   <InfoTooltip
                     trigger={vibe === 'epic' ? 'Group' : 'Who'}
                     content={content[vibe].whoIsItFor}
                     isDark={vibe === 'epic'}
                     arrowPosition="right"
                   />
-                </div>
+              </motion.div>
 
-            {/* Vibe Toggle below info tooltips */}
             <div className="mt-4">
               <VibeToggle value={vibe} onChange={handleVibeChange} />
             </div>
 
-            {/* Hosted By Section */}
-            <div className="mt-12 flex items-center justify-center gap-4">
-              <p className={`text-sm font-light uppercase tracking-wider ${
-                vibe === 'epic' ? 'text-black/50' : 'text-white/50'
-              }`}>
+              <motion.div 
+                className="mt-8 flex items-center justify-center lg:justify-start gap-4"
+                key={`cohosted-${vibe}`}
+              >
+                <motion.p 
+                  className={`text-xs sm:text-sm font-light uppercase tracking-wider transition-colors duration-300 ${
+                    vibe === 'epic' ? 'text-amber-200/60' : 'text-white/60'
+                  }`}
+                  animate={{
+                    color: vibe === 'epic' ? 'rgba(253, 230, 138, 0.6)' : 'rgba(255, 255, 255, 0.6)'
+                  }}
+                >
                 Cohosted by
-              </p>
+                </motion.p>
               <div className="flex items-center gap-3">
                 <a href="https://www.asteriafilm.com" target="_blank" rel="noopener noreferrer" className="opacity-75 hover:opacity-100 transition-opacity">
+                    {vibe === 'epic' ? (
                   <img 
                     src="/a.png" 
                     alt="Asteria" 
-                    className="h-8 w-8 object-contain transition-all" 
-                    style={{ filter: vibe === 'epic' ? 'invert(1)' : 'none' }}
-                  />
-                </a>
-                <span className={`text-xl ${vibe === 'epic' ? 'text-black/30' : 'text-white/30'}`}>×</span>
+                        className="h-6 w-6 object-contain transition-all duration-300 brightness-[2] sepia saturate-[3] hue-rotate-[5deg]" 
+                      />
+                    ) : (
+                  <img 
+                    src="/a.png" 
+                    alt="Asteria" 
+                        className="h-6 w-6 object-contain transition-all duration-300 brightness-[2]" 
+                      />
+                    )}
+                  </a>
+                  <motion.span 
+                    className={`text-lg transition-colors duration-300 ${vibe === 'epic' ? 'text-amber-200/40' : 'text-white/40'}`}
+                    animate={{
+                      color: vibe === 'epic' ? 'rgba(253, 230, 138, 0.4)' : 'rgba(255, 255, 255, 0.4)'
+                    }}
+                  >×</motion.span>
                 <a href="https://banodoco.ai/" target="_blank" rel="noopener noreferrer" className="opacity-75 hover:opacity-100 transition-opacity">
+                    {vibe === 'epic' ? (
                   <img 
                     src="/b.png" 
                     alt="Banodoco" 
-                    className="h-8 w-8 object-contain transition-all" 
-                    style={{ filter: vibe === 'epic' ? 'invert(1)' : 'none' }}
+                        className="h-6 w-6 object-contain transition-all duration-300 brightness-[2] sepia saturate-[3] hue-rotate-[5deg]" 
+                      />
+                    ) : (
+                  <img 
+                    src="/b.png" 
+                    alt="Banodoco" 
+                        className="h-6 w-6 object-contain transition-all duration-300 brightness-[2]" 
                   />
+                    )}
                 </a>
               </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
+
+        {/* Right Video Screen - 60% */}
+        <div className="relative w-[60%] h-[80vh] flex items-center justify-center pr-16">
+          {/* Deep shadow layers for depth */}
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-black/40 blur-3xl transform scale-95" />
+            <div className="absolute inset-0 bg-black/30 blur-2xl transform scale-98" />
+          </div>
+          
+          {/* Inner container with group for hover */}
+          <div className="relative w-full h-full group z-20">
+            {/* Watch Full Screen Button - appears on hover */}
+            <div 
+              className="absolute inset-0 z-50 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto"
+              style={{
+                background: vibe === 'epic' 
+                  ? 'radial-gradient(circle at center, rgba(26, 13, 8, 0.5) 0%, rgba(26, 13, 8, 0.2) 100%)'
+                  : 'radial-gradient(circle at center, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 100%)',
+                backdropFilter: 'blur(2px)'
+              }}
+            >
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="absolute inset-0 flex items-center justify-center cursor-pointer"
+              >
+              <motion.div 
+                initial={{ y: 10 }}
+                animate={{ y: 0 }}
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center gap-4 px-6 py-3"
+              >
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <Play 
+                    size={28} 
+                    className={vibe === 'epic' ? 'text-amber-400' : 'text-white'} 
+                    fill="currentColor"
+                    style={{
+                      filter: vibe === 'epic' 
+                        ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.5))'
+                        : 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.5))'
+                    }}
+                  />
+        </motion.div>
+                <span 
+                  className={`text-sm uppercase tracking-[0.3em] font-light ${
+                    vibe === 'epic' ? 'text-amber-200' : 'text-white'
+                  }`}
+                  style={{
+                    textShadow: vibe === 'epic'
+                      ? '0 0 20px rgba(251, 191, 36, 0.3)'
+                      : '0 0 20px rgba(255, 255, 255, 0.3)'
+                  }}
+                >
+                  {content[vibe].watchTrailer}
+                </span>
       </motion.div>
+            </button>
+          </div>
+          
+          {/* Screen Frame - Changes based on vibe */}
+          <motion.div
+            className="relative w-full h-full"
+            animate={{
+              filter: isGlitching ? `blur(4px)` : 'none',
+            }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Art Deco Frame (Epic) */}
+            {vibe === 'epic' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 pointer-events-none z-20"
+              >
+                {/* Outer frame - only on edges */}
+                <div className="absolute inset-0">
+                  {/* Top bar */}
+                  <div className="absolute top-0 left-0 right-0 h-6" style={{
+                    background: 'linear-gradient(135deg, #1a0d08 0%, #3d2817 50%, #1a0d08 100%)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.9)',
+                  }} />
+                  {/* Bottom bar */}
+                  <div className="absolute bottom-0 left-0 right-0 h-6" style={{
+                    background: 'linear-gradient(135deg, #1a0d08 0%, #3d2817 50%, #1a0d08 100%)',
+                    boxShadow: '0 -4px 16px rgba(0,0,0,0.9)',
+                  }} />
+                  {/* Left bar */}
+                  <div className="absolute top-0 bottom-0 left-0 w-6" style={{
+                    background: 'linear-gradient(135deg, #1a0d08 0%, #3d2817 50%, #1a0d08 100%)',
+                    boxShadow: '4px 0 16px rgba(0,0,0,0.9)',
+                  }} />
+                  {/* Right bar */}
+                  <div className="absolute top-0 bottom-0 right-0 w-6" style={{
+                    background: 'linear-gradient(135deg, #1a0d08 0%, #3d2817 50%, #1a0d08 100%)',
+                    boxShadow: '-4px 0 16px rgba(0,0,0,0.9)',
+                  }} />
+                </div>
+                
+                {/* Gold trim */}
+                <div className="absolute inset-0" style={{
+                  border: '2px solid transparent',
+                  borderImage: 'linear-gradient(135deg, #d97706 0%, #fbbf24 25%, #f59e0b 50%, #fbbf24 75%, #d97706 100%) 1',
+                  boxShadow: 'inset 0 0 20px rgba(251,191,36,0.2), 0 0 20px rgba(251,191,36,0.3)',
+                }} />
+                
+                {/* Ornate corner pieces */}
+                <div className="absolute top-3 left-3 w-20 h-20">
+                  <div className="absolute inset-0 border-t-4 border-l-4 border-amber-400" style={{
+                    borderImage: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) 1',
+                    filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.6))'
+                  }} />
+                  <div className="absolute top-0 left-0 w-4 h-4 bg-amber-400 rounded-full" style={{
+                    boxShadow: '0 0 12px rgba(251,191,36,0.8)'
+                  }} />
+                </div>
+                <div className="absolute top-3 right-3 w-20 h-20">
+                  <div className="absolute inset-0 border-t-4 border-r-4 border-amber-400" style={{
+                    borderImage: 'linear-gradient(225deg, #fbbf24 0%, #f59e0b 100%) 1',
+                    filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.6))'
+                  }} />
+                  <div className="absolute top-0 right-0 w-4 h-4 bg-amber-400 rounded-full" style={{
+                    boxShadow: '0 0 12px rgba(251,191,36,0.8)'
+                  }} />
+                </div>
+                <div className="absolute bottom-3 left-3 w-20 h-20">
+                  <div className="absolute inset-0 border-b-4 border-l-4 border-amber-400" style={{
+                    borderImage: 'linear-gradient(45deg, #fbbf24 0%, #f59e0b 100%) 1',
+                    filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.6))'
+                  }} />
+                  <div className="absolute bottom-0 left-0 w-4 h-4 bg-amber-400 rounded-full" style={{
+                    boxShadow: '0 0 12px rgba(251,191,36,0.8)'
+                  }} />
+                </div>
+                <div className="absolute bottom-3 right-3 w-20 h-20">
+                  <div className="absolute inset-0 border-b-4 border-r-4 border-amber-400" style={{
+                    borderImage: 'linear-gradient(315deg, #fbbf24 0%, #f59e0b 100%) 1',
+                    filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.6))'
+                  }} />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 bg-amber-400 rounded-full" style={{
+                    boxShadow: '0 0 12px rgba(251,191,36,0.8)'
+                  }} />
+                </div>
+                
+                {/* Decorative mid-lines with gradients */}
+                <div className="absolute top-3 left-24 right-24 h-0.5" style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(251,191,36,0.8) 50%, transparent 100%)',
+                  boxShadow: '0 0 10px rgba(251,191,36,0.5)'
+                }} />
+                <div className="absolute bottom-3 left-24 right-24 h-0.5" style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(251,191,36,0.8) 50%, transparent 100%)',
+                  boxShadow: '0 0 10px rgba(251,191,36,0.5)'
+                }} />
+              </motion.div>
+            )}
+
+            {/* Modern Minimal Frame (Chill) */}
+            {vibe === 'chill' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 pointer-events-none z-20"
+              >
+                {/* Frame bars - only on edges */}
+                <div className="absolute inset-0">
+                  {/* Top bar */}
+                  <div className="absolute top-0 left-0 right-0 h-4" style={{
+                    background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.8)',
+                  }} />
+                  {/* Bottom bar */}
+                  <div className="absolute bottom-0 left-0 right-0 h-4" style={{
+                    background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%)',
+                    boxShadow: '0 -4px 16px rgba(0,0,0,0.8)',
+                  }} />
+                  {/* Left bar */}
+                  <div className="absolute top-0 bottom-0 left-0 w-4" style={{
+                    background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%)',
+                    boxShadow: '4px 0 16px rgba(0,0,0,0.8)',
+                  }} />
+                  {/* Right bar */}
+                  <div className="absolute top-0 bottom-0 right-0 w-4" style={{
+                    background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%)',
+                    boxShadow: '-4px 0 16px rgba(0,0,0,0.8)',
+                  }} />
+                </div>
+                
+                {/* Clean border with glow */}
+                <div className="absolute inset-0 border border-blue-400/40" style={{
+                  boxShadow: '0 0 30px rgba(59,130,246,0.2), inset 0 0 20px rgba(59,130,246,0.1)',
+                }} />
+                
+                {/* Corner accents */}
+                <div className="absolute top-1 left-1 w-8 h-8 border-t-2 border-l-2 border-blue-400/60" style={{
+                  filter: 'drop-shadow(0 0 4px rgba(59,130,246,0.5))'
+                }} />
+                <div className="absolute top-1 right-1 w-8 h-8 border-t-2 border-r-2 border-blue-400/60" style={{
+                  filter: 'drop-shadow(0 0 4px rgba(59,130,246,0.5))'
+                }} />
+                <div className="absolute bottom-1 left-1 w-8 h-8 border-b-2 border-l-2 border-blue-400/60" style={{
+                  filter: 'drop-shadow(0 0 4px rgba(59,130,246,0.5))'
+                }} />
+                <div className="absolute bottom-1 right-1 w-8 h-8 border-b-2 border-r-2 border-blue-400/60" style={{
+                  filter: 'drop-shadow(0 0 4px rgba(59,130,246,0.5))'
+                }} />
+              </motion.div>
+            )}
+
+            {/* Video Container with Screen Glow */}
+            <div className="relative w-full h-full overflow-hidden bg-black">
+              {/* Screen glow effect */}
+              <motion.div
+                className="absolute inset-0 pointer-events-none z-10"
+                animate={{
+                  opacity: [0.3, 0.5, 0.3],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                style={{
+                  background: vibe === 'epic'
+                    ? 'radial-gradient(circle at center, rgba(251,191,36,0.2) 0%, transparent 70%)'
+                    : 'radial-gradient(circle at center, rgba(59,130,246,0.15) 0%, transparent 70%)'
+                }}
+              />
+
+              {/* Visible Background Video */}
+              <motion.video
+                ref={videoRef}
+                autoPlay
+                loop
+                muted
+                playsInline
+                poster={vibe === 'epic' ? '/epic-hero-poster.jpg' : '/chill-hero-poster.jpg'}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ 
+                  opacity: 1,
+                  scale: isGlitching ? [1, 1.05, 0.95, 1] : 1,
+                  rotate: isGlitching ? (rotationDirection === 'right' ? [0, 1, -1, 0] : [0, -1, 1, 0]) : 0,
+                }}
+                transition={{ duration: isGlitching ? 0.6 : 0.5 }}
+                className="w-full h-full object-cover"
+                style={{
+                  filter: isGlitching ? `blur(8px) saturate(2) hue-rotate(${rotationDirection === 'right' ? 30 : -30}deg)` : 'none',
+                }}
+              >
+                <source src={vibe === 'epic' ? '/epic-hero.mp4' : '/chill-hero.mp4'} type="video/mp4" />
+              </motion.video>
+
+              {/* Hidden preload video for the inactive vibe */}
+              <video
+                ref={preloadVideoRef}
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="hidden"
+                src={vibe === 'epic' ? '/chill-hero.mp4' : '/epic-hero.mp4'}
+              />
+            </div>
+          </motion.div>
+
+          {/* Multi-layer external screen glow (illuminates the "room") */}
+          <div className="absolute inset-0 pointer-events-none overflow-visible">
+            {/* Primary glow - bright and focused */}
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                filter: 'blur(80px)',
+              }}
+              animate={{
+                opacity: [0.5, 0.7, 0.5],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <div 
+                className="w-full h-full"
+                style={{
+                  background: vibe === 'epic'
+                    ? 'radial-gradient(ellipse 120% 110% at 50% 50%, rgba(251,191,36,0.5) 0%, rgba(217,119,6,0.3) 30%, transparent 60%)'
+                    : 'radial-gradient(ellipse 120% 110% at 50% 50%, rgba(96,165,250,0.4) 0%, rgba(59,130,246,0.25) 30%, transparent 60%)'
+                }}
+              />
+        </motion.div>
+            
+            {/* Secondary glow - softer and wider */}
+            <motion.div
+              className="absolute -inset-20"
+              style={{
+                filter: 'blur(120px)',
+              }}
+              animate={{
+                opacity: [0.25, 0.4, 0.25],
+              }}
+              transition={{
+                duration: 7,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1
+              }}
+            >
+              <div 
+                className="w-full h-full"
+                style={{
+                  background: vibe === 'epic'
+                    ? 'radial-gradient(ellipse 100% 90% at 50% 50%, rgba(251,191,36,0.3) 0%, rgba(217,119,6,0.2) 40%, transparent 70%)'
+                    : 'radial-gradient(ellipse 100% 90% at 50% 50%, rgba(59,130,246,0.25) 0%, rgba(37,99,235,0.15) 40%, transparent 70%)'
+                }}
+              />
+      </motion.div>
+            
+            {/* Edge highlights - subtle light spill */}
+            <motion.div
+              className="absolute -inset-8"
+              animate={{
+                opacity: [0.15, 0.25, 0.15],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 2
+              }}
+              style={{
+                background: vibe === 'epic'
+                  ? 'radial-gradient(ellipse 150% 120% at 50% 50%, transparent 40%, rgba(251,191,36,0.15) 70%, transparent 100%)'
+                  : 'radial-gradient(ellipse 150% 120% at 50% 50%, transparent 40%, rgba(59,130,246,0.12) 70%, transparent 100%)',
+                filter: 'blur(40px)'
+              }}
+            />
+          </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Kaleidoscope Vortex Overlay - Behind video on desktop, in front on mobile */}
+      {isGlitching && (
+        <div className="absolute inset-0 pointer-events-none z-30 lg:z-0">
+          {/* Gentle center flash */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            animate={{
+              opacity: [0, 0.4, 0],
+            }}
+            style={{ 
+              background: vibe === 'epic' 
+                ? 'radial-gradient(circle at 50% 50%, rgba(255,200,150,0.5) 0%, transparent 35%)'
+                : 'radial-gradient(circle at 50% 50%, rgba(150,200,255,0.4) 0%, transparent 35%)',
+              mixBlendMode: 'screen' 
+            }}
+            transition={{ duration: 0.3 }}
+          />
+
+          {/* Subtle edge vignette pulse */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            animate={{
+              opacity: [0, 0.6, 0],
+            }}
+            style={{ 
+              background: 'radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%)',
+            }}
+            transition={{ duration: 0.6 }}
+          />
+
+          {/* Radial gradient pulses */}
+          {[0, 1, 2, 3].map((i) => {
+            const multiplier = rotationDirection === 'right' ? 1 : -1
+            const pulseColor = vibe === 'epic' ? 'rgba(251,191,36,0.2)' : 'rgba(255,255,255,0.1)'
+            return (
+              <motion.div
+                key={i}
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle at 50% 50%, transparent ${20 + i * 15}%, ${pulseColor} ${25 + i * 15}%, transparent ${30 + i * 15}%)`,
+                  mixBlendMode: 'overlay',
+                }}
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0, 0.8, 0],
+                  rotate: [0, 180 * multiplier * (i % 2 ? 1 : -1), 360 * multiplier * (i % 2 ? 1 : -1)],
+                }}
+                transition={{ duration: 0.6, delay: i * 0.05 }}
+              />
+            )
+          })}
+          
+          {/* Kaleidoscope mirror effect */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: vibe === 'epic' 
+                ? 'conic-gradient(from 0deg, transparent 0deg, rgba(251,191,36,0.4) 60deg, transparent 120deg, rgba(217,119,6,0.4) 180deg, transparent 240deg, rgba(251,191,36,0.4) 300deg, transparent 360deg)'
+                : 'conic-gradient(from 0deg, transparent 0deg, rgba(255,100,255,0.3) 60deg, transparent 120deg, rgba(100,255,255,0.3) 180deg, transparent 240deg, rgba(255,255,100,0.3) 300deg, transparent 360deg)',
+              mixBlendMode: 'screen',
+            }}
+            animate={{
+              rotate: rotationDirection === 'right' ? [0, 720] : [0, -720],
+              scale: [1, 1.2, 1],
+              opacity: [0, 1, 0],
+            }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+          />
+          
+          {/* Prismatic color burst */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            animate={{
+              background: vibe === 'epic' 
+                ? [
+                    'radial-gradient(circle at 50% 50%, rgba(251,191,36,0.5) 0%, transparent 30%)',
+                    'radial-gradient(circle at 50% 50%, rgba(217,119,6,0.5) 0%, transparent 50%)',
+                    'radial-gradient(circle at 50% 50%, rgba(251,191,36,0.5) 0%, transparent 30%)',
+                    'radial-gradient(circle at 50% 50%, transparent 0%, transparent 30%)',
+                  ]
+                : [
+                    'radial-gradient(circle at 50% 50%, rgba(255,0,255,0.4) 0%, transparent 30%)',
+                    'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.4) 0%, transparent 50%)',
+                    'radial-gradient(circle at 50% 50%, rgba(255,255,0,0.4) 0%, transparent 30%)',
+                    'radial-gradient(circle at 50% 50%, transparent 0%, transparent 30%)',
+                  ],
+              scale: [0.5, 2, 0.5],
+              opacity: [0, 0.8, 0],
+            }}
+            style={{ mixBlendMode: 'screen' }}
+            transition={{ duration: 0.6 }}
+          />
+        </div>
+      )}
+
 
       <VideoModal
         isOpen={isModalOpen}

@@ -22,23 +22,26 @@ export function VibeToggle({ value, onChange }: VibeToggleProps) {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className={`text-sm uppercase tracking-wider transition-all ${
+        className={`text-sm uppercase tracking-wider transition-all duration-300 ${
           vibe === 'chill'
             ? 'text-white font-semibold'
             : vibe === 'epic'
-              ? 'text-black/50 hover:text-black/75'
+              ? 'text-amber-200/50 hover:text-amber-200/75'
               : 'text-white/50 hover:text-white/75'
         }`}
       >
         Chill
       </motion.button>
       
-      <div className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors ${
-        vibe === 'epic' ? 'bg-black/20' : 'bg-white/20'
-      }`} onClick={() => onChange(vibe === 'chill' ? 'epic' : 'chill')}>
+      <div 
+        className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-300 ${
+          vibe === 'epic' ? 'bg-amber-500/20' : 'bg-white/20'
+        }`}
+        onClick={() => onChange(vibe === 'chill' ? 'epic' : 'chill')}
+      >
         <motion.div
-          className={`absolute top-0.5 w-5 h-5 rounded-full shadow-lg transition-colors ${
-            vibe === 'epic' ? 'bg-black' : 'bg-white'
+          className={`absolute top-0.5 w-5 h-5 rounded-full shadow-lg ${
+            vibe === 'epic' ? 'bg-amber-400' : 'bg-white'
           }`}
           animate={{
             left: vibe === 'chill' ? '2px' : '26px',
@@ -57,9 +60,9 @@ export function VibeToggle({ value, onChange }: VibeToggleProps) {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className={`text-sm uppercase tracking-wider transition-all ${
+        className={`text-sm uppercase tracking-wider transition-all duration-300 ${
           vibe === 'epic'
-            ? 'text-black font-semibold'
+            ? 'text-amber-300 font-semibold'
             : 'text-white/50 hover:text-white/75'
         }`}
       >
