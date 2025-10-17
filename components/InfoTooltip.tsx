@@ -99,7 +99,7 @@ export function InfoTooltip({ trigger, content, isDark = false, arrowPosition = 
           onMouseLeave={() => setIsOpen(false)}
           className={`transition-colors duration-300 text-sm uppercase tracking-wide border-b pb-1 whitespace-nowrap ${
             isDark 
-              ? 'text-black/80 hover:text-black border-black/40 hover:border-black lg:text-amber-200/80 lg:hover:text-amber-100 lg:border-amber-300/40 lg:hover:border-amber-300' 
+              ? 'text-black/80 hover:text-black border-black/40 hover:border-black lg:text-yellow-100/80 lg:hover:text-yellow-50 lg:border-yellow-200/40 lg:hover:border-yellow-200' 
               : 'text-white/80 hover:text-white border-white/40 hover:border-white'
           }`}
         >
@@ -116,7 +116,7 @@ export function InfoTooltip({ trigger, content, isDark = false, arrowPosition = 
               transition={{ duration: 0.2 }}
               className={`hidden md:block absolute left-full bottom-full backdrop-blur-sm p-4 rounded-lg text-sm text-left whitespace-pre-line z-50 w-64 ${
                 isDark
-                  ? 'bg-amber-950/90 text-amber-50 border border-amber-500/30 shadow-xl shadow-amber-900/20'
+                  ? 'bg-yellow-950/90 text-yellow-50 border border-yellow-600/30 shadow-xl shadow-yellow-900/20'
                   : 'bg-black/90 text-white border border-white/20'
               }`}
               style={{

@@ -26,7 +26,7 @@ export function VibeToggle({ value, onChange }: VibeToggleProps) {
           vibe === 'chill'
             ? 'text-white font-semibold'
             : vibe === 'epic'
-              ? 'text-amber-200/50 hover:text-amber-200/75'
+              ? 'text-yellow-100/50 hover:text-yellow-100/75'
               : 'text-white/50 hover:text-white/75'
         }`}
       >
@@ -35,13 +35,13 @@ export function VibeToggle({ value, onChange }: VibeToggleProps) {
       
       <div 
         className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-300 ${
-          vibe === 'epic' ? 'bg-amber-500/20' : 'bg-white/20'
+          vibe === 'epic' ? 'bg-yellow-500/20' : 'bg-white/20'
         }`}
         onClick={() => onChange(vibe === 'chill' ? 'epic' : 'chill')}
       >
         <motion.div
           className={`absolute top-0.5 w-5 h-5 rounded-full shadow-lg ${
-            vibe === 'epic' ? 'bg-amber-400' : 'bg-white'
+            vibe === 'epic' ? 'bg-yellow-300' : 'bg-white'
           }`}
           animate={{
             left: vibe === 'chill' ? '2px' : '26px',
@@ -62,7 +62,7 @@ export function VibeToggle({ value, onChange }: VibeToggleProps) {
         }}
         className={`text-sm uppercase tracking-wider transition-all duration-300 ${
           vibe === 'epic'
-            ? 'text-amber-300 font-semibold'
+            ? 'text-yellow-200 font-semibold'
             : 'text-white/50 hover:text-white/75'
         }`}
       >

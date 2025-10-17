@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { VideoModal } from '@/components/VideoModal'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { VibeToggle } from '@/components/VibeToggle'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -25,6 +25,7 @@ export function Hero() {
   const [invalidInvite, setInvalidInvite] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [applicationStatus, setApplicationStatus] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const supabase = createClient()
 
   // Prefetch event page as soon as Hero loads for instant navigation
@@ -32,6 +33,15 @@ export function Hero() {
     router.prefetch('/events/ados-2025')
     router.prefetch('/events/ados-2025/apply')
   }, [router])
+
+  // Handle loading state - wait for video to be ready
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 800) // Minimum loading time for smooth experience
+
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleVibeChange = (newVibe: 'chill' | 'epic') => {
     if (newVibe === vibe) return
@@ -49,10 +59,10 @@ export function Hero() {
       if (videoRef.current) {
         videoRef.current.currentTime = currentTime
       }
-    }, 300) // Change content mid-glitch
+    }, 400) // Change content mid-glitch
     setTimeout(() => {
       setIsGlitching(false)
-    }, 600) // End glitch
+    }, 800) // End glitch - longer to ensure completion
   }
 
   // Check if user is admin and application status, but after a short delay
@@ -208,6 +218,59 @@ export function Hero() {
   }
 
   return (
+    <>
+      {/* Loading State */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black"
+          >
+            <motion.div
+              className="flex flex-col items-center gap-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              {/* ADOS text */}
+              <motion.h1 
+                className="text-5xl md:text-7xl font-black uppercase text-white tracking-[0.5em]"
+                animate={{
+                  opacity: [0.4, 1, 0.4],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                style={{
+                  textShadow: '0 0 40px rgba(255,255,255,0.2)',
+                  marginRight: '-0.5em'
+                }}
+              >
+                ADOS
+              </motion.h1>
+              
+              {/* Loading bar */}
+              <div className="w-32 h-0.5 bg-white/20 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-white/60"
+                  initial={{ x: '-100%' }}
+                  animate={{ x: '200%' }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     <div className="relative h-[100dvh] overflow-hidden">
       {/* Cinema Background with Texture */}
       <motion.div 
@@ -508,10 +571,10 @@ export function Hero() {
                 )}
             
             <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 uppercase transition-colors duration-300 ${
-              vibe === 'epic' ? 'text-amber-500' : 'text-white'
+              vibe === 'epic' ? 'text-yellow-50' : 'text-white'
             }`} style={{
               textShadow: vibe === 'epic' 
-                ? '0 0 40px rgba(251,191,36,0.3), 0 0 80px rgba(251,191,36,0.2)'
+                ? '0 0 40px rgba(234,179,8,0.25), 0 0 80px rgba(234,179,8,0.15)'
                 : '0 0 40px rgba(255,255,255,0.2), 0 0 80px rgba(255,255,255,0.1)',
               letterSpacing: '0.5em',
               fontWeight: 900
@@ -524,12 +587,12 @@ export function Hero() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
               className={`text-sm sm:text-base md:text-lg mb-6 font-light uppercase transition-colors duration-300 ${
-                vibe === 'epic' ? 'text-amber-200/90' : 'text-white/90'
+                vibe === 'epic' ? 'text-yellow-100/80' : 'text-white/90'
               }`}
               style={{
                 letterSpacing: '0.2em',
                 textShadow: vibe === 'epic' 
-                  ? '0 0 20px rgba(251,191,36,0.2)'
+                  ? '0 0 20px rgba(234,179,8,0.15)'
                   : '0 0 20px rgba(255,255,255,0.15)',
                 fontWeight: 300
               }}
@@ -542,12 +605,12 @@ export function Hero() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
               className={`text-xs sm:text-sm mb-7 font-light uppercase transition-colors duration-300 ${
-                vibe === 'epic' ? 'text-amber-200/70' : 'text-white/70'
+                vibe === 'epic' ? 'text-yellow-100/60' : 'text-white/70'
               }`}
               style={{
                 letterSpacing: '0.25em',
                 textShadow: vibe === 'epic' 
-                  ? '0 0 15px rgba(251,191,36,0.15)'
+                  ? '0 0 15px rgba(234,179,8,0.12)'
                   : '0 0 15px rgba(255,255,255,0.1)',
                 fontWeight: 300
               }}
@@ -593,7 +656,7 @@ export function Hero() {
                   animate={{ opacity: 1 }}
                   onClick={() => setIsModalOpen(true)}
                 className={`lg:hidden flex items-center gap-2 transition-colors text-sm uppercase tracking-wide group ${
-                  vibe === 'epic' ? 'text-amber-200 hover:text-amber-100' : 'text-white hover:text-gray-300'
+                  vibe === 'epic' ? 'text-yellow-100 hover:text-yellow-50' : 'text-white hover:text-gray-300'
                   }`}
                 >
                   <motion.div
@@ -619,9 +682,9 @@ export function Hero() {
                     arrowPosition="left"
                   />
                 <motion.span 
-                  className={`transition-colors duration-300 ${vibe === 'epic' ? 'text-amber-300/40' : 'text-white/40'}`}
+                  className={`transition-colors duration-300 ${vibe === 'epic' ? 'text-yellow-200/40' : 'text-white/40'}`}
                   animate={{
-                    color: vibe === 'epic' ? 'rgba(252, 211, 77, 0.4)' : 'rgba(255, 255, 255, 0.4)'
+                    color: vibe === 'epic' ? 'rgba(254, 240, 138, 0.4)' : 'rgba(255, 255, 255, 0.4)'
                   }}
                 >|</motion.span>
                   <InfoTooltip
@@ -631,9 +694,9 @@ export function Hero() {
                     arrowPosition="center"
                   />
                 <motion.span 
-                  className={`transition-colors duration-300 ${vibe === 'epic' ? 'text-amber-300/40' : 'text-white/40'}`}
+                  className={`transition-colors duration-300 ${vibe === 'epic' ? 'text-yellow-200/40' : 'text-white/40'}`}
                   animate={{
-                    color: vibe === 'epic' ? 'rgba(252, 211, 77, 0.4)' : 'rgba(255, 255, 255, 0.4)'
+                    color: vibe === 'epic' ? 'rgba(254, 240, 138, 0.4)' : 'rgba(255, 255, 255, 0.4)'
                   }}
                 >|</motion.span>
                   <InfoTooltip
@@ -654,10 +717,10 @@ export function Hero() {
               >
                 <motion.p 
                   className={`text-xs sm:text-sm font-light uppercase tracking-wider transition-colors duration-300 ${
-                    vibe === 'epic' ? 'text-amber-200/60' : 'text-white/60'
+                    vibe === 'epic' ? 'text-yellow-100/50' : 'text-white/60'
                   }`}
                   animate={{
-                    color: vibe === 'epic' ? 'rgba(253, 230, 138, 0.6)' : 'rgba(255, 255, 255, 0.6)'
+                    color: vibe === 'epic' ? 'rgba(254, 243, 199, 0.5)' : 'rgba(255, 255, 255, 0.6)'
                   }}
                 >
                 Cohosted by
@@ -679,9 +742,9 @@ export function Hero() {
                     )}
                   </a>
                   <motion.span 
-                    className={`text-lg transition-colors duration-300 ${vibe === 'epic' ? 'text-amber-200/40' : 'text-white/40'}`}
+                    className={`text-lg transition-colors duration-300 ${vibe === 'epic' ? 'text-yellow-200/40' : 'text-white/40'}`}
                     animate={{
-                      color: vibe === 'epic' ? 'rgba(253, 230, 138, 0.4)' : 'rgba(255, 255, 255, 0.4)'
+                      color: vibe === 'epic' ? 'rgba(254, 240, 138, 0.4)' : 'rgba(255, 255, 255, 0.4)'
                     }}
                   >×</motion.span>
                 <a href="https://banodoco.ai/" target="_blank" rel="noopener noreferrer" className="opacity-75 hover:opacity-100 transition-opacity">
@@ -748,22 +811,22 @@ export function Hero() {
                 >
                   <Play 
                     size={28} 
-                    className={vibe === 'epic' ? 'text-amber-400' : 'text-white'} 
+                    className={vibe === 'epic' ? 'text-yellow-300' : 'text-white'} 
                     fill="currentColor"
                     style={{
                       filter: vibe === 'epic' 
-                        ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.5))'
+                        ? 'drop-shadow(0 0 8px rgba(234, 179, 8, 0.5))'
                         : 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.5))'
                     }}
                   />
         </motion.div>
                 <span 
                   className={`text-sm uppercase tracking-[0.3em] font-light ${
-                    vibe === 'epic' ? 'text-amber-200' : 'text-white'
+                    vibe === 'epic' ? 'text-yellow-100' : 'text-white'
                   }`}
                   style={{
                     textShadow: vibe === 'epic'
-                      ? '0 0 20px rgba(251, 191, 36, 0.3)'
+                      ? '0 0 20px rgba(234, 179, 8, 0.3)'
                       : '0 0 20px rgba(255, 255, 255, 0.3)'
                   }}
                 >
@@ -979,19 +1042,20 @@ export function Hero() {
             </div>
           </motion.div>
 
-          {/* Multi-layer external screen glow (illuminates the "room") */}
+          {/* Multi-layer external screen glow (illuminates the entire room) */}
           <div className="absolute inset-0 pointer-events-none overflow-visible">
-            {/* Primary glow - bright and focused */}
+            {/* Primary glow - bright and pulsing */}
             <motion.div
-              className="absolute inset-0"
+              className="absolute -inset-32"
               style={{
-                filter: 'blur(80px)',
+                filter: 'blur(100px)',
               }}
               animate={{
-                opacity: [0.5, 0.7, 0.5],
+                opacity: [0.3, 0.45, 0.3],
+                scale: [1, 1.05, 1],
               }}
               transition={{
-                duration: 5,
+                duration: 4,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
@@ -1000,55 +1064,77 @@ export function Hero() {
                 className="w-full h-full"
                 style={{
                   background: vibe === 'epic'
-                    ? 'radial-gradient(ellipse 120% 110% at 50% 50%, rgba(251,191,36,0.5) 0%, rgba(217,119,6,0.3) 30%, transparent 60%)'
-                    : 'radial-gradient(ellipse 120% 110% at 50% 50%, rgba(96,165,250,0.4) 0%, rgba(59,130,246,0.25) 30%, transparent 60%)'
+                    ? 'radial-gradient(ellipse 150% 140% at 50% 50%, rgba(251,191,36,0.3) 0%, rgba(217,119,6,0.2) 25%, rgba(217,119,6,0.1) 50%, transparent 75%)'
+                    : 'radial-gradient(ellipse 150% 140% at 50% 50%, rgba(96,165,250,0.25) 0%, rgba(59,130,246,0.18) 25%, rgba(59,130,246,0.1) 50%, transparent 75%)'
                 }}
               />
-        </motion.div>
+            </motion.div>
             
-            {/* Secondary glow - softer and wider */}
+            {/* Secondary glow - wider reach with pulse */}
             <motion.div
-              className="absolute -inset-20"
+              className="absolute -inset-48"
               style={{
-                filter: 'blur(120px)',
+                filter: 'blur(150px)',
               }}
               animate={{
-                opacity: [0.25, 0.4, 0.25],
+                opacity: [0.18, 0.28, 0.18],
+                scale: [0.98, 1.02, 0.98],
               }}
               transition={{
-                duration: 7,
+                duration: 6,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: 1
+                delay: 1.5
               }}
             >
               <div 
                 className="w-full h-full"
                 style={{
                   background: vibe === 'epic'
-                    ? 'radial-gradient(ellipse 100% 90% at 50% 50%, rgba(251,191,36,0.3) 0%, rgba(217,119,6,0.2) 40%, transparent 70%)'
-                    : 'radial-gradient(ellipse 100% 90% at 50% 50%, rgba(59,130,246,0.25) 0%, rgba(37,99,235,0.15) 40%, transparent 70%)'
+                    ? 'radial-gradient(ellipse 140% 130% at 50% 50%, rgba(251,191,36,0.2) 0%, rgba(217,119,6,0.12) 30%, rgba(217,119,6,0.05) 60%, transparent 85%)'
+                    : 'radial-gradient(ellipse 140% 130% at 50% 50%, rgba(59,130,246,0.18) 0%, rgba(37,99,235,0.1) 30%, rgba(37,99,235,0.05) 60%, transparent 85%)'
                 }}
               />
-      </motion.div>
+            </motion.div>
             
-            {/* Edge highlights - subtle light spill */}
+            {/* Edge highlights - reaches all edges */}
             <motion.div
-              className="absolute -inset-8"
+              className="absolute -inset-64"
               animate={{
-                opacity: [0.15, 0.25, 0.15],
+                opacity: [0.1, 0.18, 0.1],
+                scale: [1, 1.03, 1],
               }}
               transition={{
                 duration: 8,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: 2
+                delay: 3
               }}
               style={{
                 background: vibe === 'epic'
-                  ? 'radial-gradient(ellipse 150% 120% at 50% 50%, transparent 40%, rgba(251,191,36,0.15) 70%, transparent 100%)'
-                  : 'radial-gradient(ellipse 150% 120% at 50% 50%, transparent 40%, rgba(59,130,246,0.12) 70%, transparent 100%)',
-                filter: 'blur(40px)'
+                  ? 'radial-gradient(ellipse 180% 160% at 50% 50%, transparent 30%, rgba(251,191,36,0.12) 55%, rgba(217,119,6,0.08) 75%, transparent 100%)'
+                  : 'radial-gradient(ellipse 180% 160% at 50% 50%, transparent 30%, rgba(59,130,246,0.1) 55%, rgba(37,99,235,0.06) 75%, transparent 100%)',
+                filter: 'blur(60px)'
+              }}
+            />
+            
+            {/* Atmospheric wash - fills entire background */}
+            <motion.div
+              className="absolute -inset-96"
+              animate={{
+                opacity: [0.08, 0.15, 0.08],
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 5
+              }}
+              style={{
+                background: vibe === 'epic'
+                  ? 'radial-gradient(ellipse 200% 180% at 50% 50%, transparent 40%, rgba(251,191,36,0.08) 70%, rgba(217,119,6,0.04) 85%, transparent 100%)'
+                  : 'radial-gradient(ellipse 200% 180% at 50% 50%, transparent 40%, rgba(59,130,246,0.06) 70%, rgba(37,99,235,0.03) 85%, transparent 100%)',
+                filter: 'blur(80px)'
               }}
             />
           </div>
@@ -1071,7 +1157,7 @@ export function Hero() {
                 : 'radial-gradient(circle at 50% 50%, rgba(150,200,255,0.4) 0%, transparent 35%)',
               mixBlendMode: 'screen' 
             }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4 }}
           />
 
           {/* Subtle edge vignette pulse */}
@@ -1083,7 +1169,7 @@ export function Hero() {
             style={{ 
               background: 'radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%)',
             }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
           />
 
           {/* Radial gradient pulses */}
@@ -1103,7 +1189,7 @@ export function Hero() {
                   opacity: [0, 0.8, 0],
                   rotate: [0, 180 * multiplier * (i % 2 ? 1 : -1), 360 * multiplier * (i % 2 ? 1 : -1)],
                 }}
-                transition={{ duration: 0.6, delay: i * 0.05 }}
+                transition={{ duration: 0.8, delay: i * 0.05 }}
               />
             )
           })}
@@ -1122,7 +1208,7 @@ export function Hero() {
               scale: [1, 1.2, 1],
               opacity: [0, 1, 0],
             }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
           />
           
           {/* Prismatic color burst */}
@@ -1146,7 +1232,7 @@ export function Hero() {
               opacity: [0, 0.8, 0],
             }}
             style={{ mixBlendMode: 'screen' }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
           />
         </div>
       )}
@@ -1158,5 +1244,6 @@ export function Hero() {
         videoSrc={vibe === 'epic' ? '/epic-hero-full.mp4' : '/chill-hero-full.mp4'}
       />
     </div>
+    </>
   )
 }
