@@ -203,7 +203,7 @@ export function Hero() {
       cta: getCtaText(),
       watchTrailer: 'Watch the Trailer',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts{'\n'}- Evening: show, drinks, frivolities{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
-      whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
+      whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable</>),
       whyGather: (<>Open models are an essential weapon against the <strong>slop machine</strong> - they offer as much control as traditional mediums, unconstrained by invented limitations or constrained imaginations - but they require an ecosystem of effort and support to thrive.{'\n\n'}We gather to celebrate AI art and open models, hang out with fellow connoisseurs, and scheme on how to help the ecosystem and community succeed.</>),
     },
     epic: {
@@ -212,7 +212,7 @@ export function Hero() {
       cta: getCtaText(),
       watchTrailer: 'Feast your eyes',
       whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts - for hardcore enthusiasts{'\n'}- Evening: show, drinks, frivolities - for curious people{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
-      whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable{'\n\n'}We won't release specifics on attendees, speakers or presenters in advance.</>),
+      whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable</>),
       whyGather: (<>Open models are an essential weapon against the <strong>slop machine</strong> - they offer as much control as traditional mediums, unconstrained by invented limitations or constrained imaginations - but they require an ecosystem of effort and support to thrive.{'\n\n'}We gather to celebrate AI art and open models, hang out with fellow connoisseurs, and scheme on how to help the ecosystem and community succeed.</>),
     },
   }
