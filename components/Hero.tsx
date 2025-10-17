@@ -202,7 +202,7 @@ export function Hero() {
       date: 'Los Angeles | November 7th',
       cta: getCtaText(),
       watchTrailer: 'Watch the Trailer',
-      whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts{'\n'}- Evening: show, drinks, frivolities{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
+      whatIsIt: (<>This will be a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts{'\n'}- Evening: show, drinks, frivolities{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable</>),
       whyGather: (<>Open models are an essential weapon against the <strong>slop machine</strong> - they offer as much control as traditional mediums, unconstrained by invented limitations or constrained imaginations - but they require an ecosystem of effort and support to thrive.{'\n\n'}We gather to celebrate AI art and open models, hang out with fellow connoisseurs, and scheme on how to help the ecosystem and community succeed.</>),
     },
@@ -211,7 +211,7 @@ export function Hero() {
       date: 'The City of Angels | November 7th',
       cta: getCtaText(),
       watchTrailer: 'Feast your eyes',
-      whatIsIt: (<>We'll bring people together for a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts - for hardcore enthusiasts{'\n'}- Evening: show, drinks, frivolities - for curious people{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
+      whatIsIt: (<>This will be a day-long event with a day-time and evening portion:{'\n\n'}- Day-time: panels, roundtables, hangouts - for hardcore enthusiasts{'\n'}- Evening: show, drinks, frivolities - for curious people{'\n\n'}Thanks to our friends at Asteria, we'll host at the legendary Mack Sennett studio.</>),
       whoIsItFor: (<>We hope to bring together a mix of people who are curious or passionate about art and open source models:{'\n\n'}- Artists: creators of art{'\n'}- Developers: people who build with open models{'\n'}- Interested parties: founders, executives, investors, etc.{'\n'}- Curious oddballs: undefinable</>),
       whyGather: (<>Open models are an essential weapon against the <strong>slop machine</strong> - they offer as much control as traditional mediums, unconstrained by invented limitations or constrained imaginations - but they require an ecosystem of effort and support to thrive.{'\n\n'}We gather to celebrate AI art and open models, hang out with fellow connoisseurs, and scheme on how to help the ecosystem and community succeed.</>),
     },
@@ -237,7 +237,7 @@ export function Hero() {
               {/* ADOS text */}
               <motion.h1 
                 className="text-5xl md:text-7xl font-black uppercase text-white tracking-[0.5em]"
-                animate={{
+        animate={{ 
                   opacity: [0.4, 1, 0.4],
                 }}
                 transition={{
@@ -245,7 +245,7 @@ export function Hero() {
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                style={{
+        style={{
                   textShadow: '0 0 40px rgba(255,255,255,0.2)',
                   marginRight: '-0.5em'
                 }}
@@ -273,23 +273,23 @@ export function Hero() {
 
     <div className="relative h-[100dvh] overflow-hidden">
       {/* Cinema Background with Texture */}
-      <motion.div 
+          <motion.div
         className="absolute inset-0 transition-all duration-700"
-        animate={{ 
+            animate={{
           background: vibe === 'epic' 
             ? 'radial-gradient(ellipse at 70% 50%, #3d2817 0%, #1a0d08 40%, #0a0503 100%)'
             : 'radial-gradient(ellipse at 70% 50%, #1a1a2e 0%, #0f0f1a 40%, #050508 100%)'
-        }}
+            }}
       />
       
       {/* Subtle noise texture overlay */}
       <div 
         className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
-        style={{
+            style={{ 
           backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
-        }}
-      />
-      
+            }}
+          />
+
       {/* Ambient wall lighting from screen */}
           <motion.div
         className="absolute inset-0 pointer-events-none"
@@ -311,7 +311,7 @@ export function Hero() {
       {/* Floor reflection subtle effect */}
       <div 
         className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-            style={{ 
+                style={{
           background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)',
         }}
       />
@@ -319,7 +319,7 @@ export function Hero() {
       {/* Subtle vignette for depth */}
       <div 
         className="absolute inset-0 pointer-events-none"
-                style={{
+            style={{
           background: 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 0%, transparent 60%, rgba(0,0,0,0.3) 100%)',
         }}
       />
