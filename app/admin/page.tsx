@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { ArrowLeft, Copy, Check } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Download } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminPage() {
@@ -284,6 +284,54 @@ export default function AdminPage() {
     }
   }
 
+  const downloadAttendees = () => {
+    // Filter attendees based on current status filter
+    const filteredAttendees = attendees.filter(a => 
+      statusFilter === 'all' ? true : a.status === statusFilter
+    )
+
+    if (filteredAttendees.length === 0) {
+      alert('No attendees to download')
+      return
+    }
+
+    // Create CSV content
+    const csvHeaders = ['Name', 'Email', 'Discord Username', 'Event', 'Status', 'Invite Code', 'Applied At']
+    
+    const csvRows = filteredAttendees.map(attendee => {
+      return [
+        attendee.profiles?.discord_username || 'Unknown',
+        attendee.profiles?.email || '',
+        attendee.profiles?.discord_username || '',
+        attendee.events?.name || '',
+        attendee.status || '',
+        attendee.invite_code || '',
+        new Date(attendee.applied_at).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
+    })
+
+    const csvContent = [csvHeaders.join(','), ...csvRows].join('\n')
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    
+    link.setAttribute('href', url)
+    link.setAttribute('download', `attendees-${statusFilter}-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -481,7 +529,18 @@ export default function AdminPage() {
 
         {/* Attendee Management */}
         <div className="mt-8 bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Manage Attendees</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Manage Attendees</h2>
+            <Button
+              onClick={downloadAttendees}
+              variant="secondary"
+              className="flex items-center gap-2"
+              disabled={attendees.filter(a => statusFilter === 'all' ? true : a.status === statusFilter).length === 0}
+            >
+              <Download size={16} />
+              Download {statusFilter === 'all' ? 'All' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+            </Button>
+          </div>
           
           {/* Status Filter */}
           <div className="flex gap-2 mb-6 flex-wrap">
@@ -519,9 +578,16 @@ export default function AdminPage() {
                         />
                       )}
                       <div>
-                        <h3 className="font-semibold text-gray-900">
-                          {attendee.profiles?.discord_username || 'Unknown User'}
-                        </h3>
+                        {attendee.profiles?.discord_username && (
+                          <>
+                            <h3 className="font-semibold text-gray-900">
+                              {attendee.profiles.discord_username}
+                            </h3>
+                            <p className="text-sm text-indigo-600 font-medium">
+                              @{attendee.profiles.discord_username}
+                            </p>
+                          </>
+                        )}
                         <p className="text-sm text-gray-600">{attendee.profiles?.email}</p>
                         {attendee.events && (
                           <p className="text-xs text-purple-600 mt-1">
