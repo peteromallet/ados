@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { ArrowLeft, Copy, Check, Download } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Download, Search } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminPage() {
@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [bulkInput, setBulkInput] = useState('')
   const [bulkResults, setBulkResults] = useState<any[]>([])
   const [isBulkSubmitting, setIsBulkSubmitting] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     async function checkAdmin() {
@@ -284,11 +285,42 @@ export default function AdminPage() {
     }
   }
 
-  const downloadAttendees = () => {
-    // Filter attendees based on current status filter
-    const filteredAttendees = attendees.filter(a => 
+  const filterAttendees = (attendeesList: any[]) => {
+    // First filter by status
+    let filtered = attendeesList.filter(a => 
       statusFilter === 'all' ? true : a.status === statusFilter
     )
+
+    // Then filter by search query if present
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(attendee => {
+        // Search across all relevant fields
+        const searchableText = [
+          attendee.profiles?.discord_username || '',
+          attendee.profiles?.email || '',
+          attendee.events?.name || '',
+          attendee.status || '',
+          attendee.invite_code || '',
+          new Date(attendee.applied_at).toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        ].join(' ').toLowerCase()
+
+        return searchableText.includes(query)
+      })
+    }
+
+    return filtered
+  }
+
+  const downloadAttendees = () => {
+    // Filter attendees based on current status filter and search
+    const filteredAttendees = filterAttendees(attendees)
 
     if (filteredAttendees.length === 0) {
       alert('No attendees to download')
@@ -535,7 +567,7 @@ export default function AdminPage() {
               onClick={downloadAttendees}
               variant="secondary"
               className="flex items-center gap-2"
-              disabled={attendees.filter(a => statusFilter === 'all' ? true : a.status === statusFilter).length === 0}
+              disabled={filterAttendees(attendees).length === 0}
             >
               <Download size={16} />
               Download {statusFilter === 'all' ? 'All' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
@@ -562,10 +594,28 @@ export default function AdminPage() {
             ))}
           </div>
 
+          {/* Search */}
+          <div className="mb-6 relative">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by name, email, event, status, invite code..."
+                className="pl-10"
+              />
+            </div>
+            {searchQuery && (
+              <p className="text-sm text-gray-600 mt-2">
+                Showing {filterAttendees(attendees).length} of {attendees.filter(a => statusFilter === 'all' ? true : a.status === statusFilter).length} {statusFilter !== 'all' && statusFilter} attendees
+              </p>
+            )}
+          </div>
+
           {/* Attendees List */}
           <div className="space-y-4">
-            {attendees
-              .filter(a => statusFilter === 'all' ? true : a.status === statusFilter)
+            {filterAttendees(attendees)
               .map((attendee) => (
                   <div key={attendee.id} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
                   <div className="flex items-start justify-between mb-4">
@@ -676,9 +726,12 @@ export default function AdminPage() {
                 </div>
               ))}
             
-            {attendees.filter(a => statusFilter === 'all' ? true : a.status === statusFilter).length === 0 && (
+            {filterAttendees(attendees).length === 0 && (
               <p className="text-gray-500 text-center py-8">
-                No {statusFilter !== 'all' && statusFilter} attendees found
+                {searchQuery 
+                  ? `No attendees found matching "${searchQuery}"`
+                  : `No ${statusFilter !== 'all' ? statusFilter : ''} attendees found`
+                }
               </p>
             )}
           </div>
