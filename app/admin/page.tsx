@@ -295,8 +295,8 @@ export default function AdminPage() {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(attendee => {
-        // Search across all relevant fields
-        const searchableText = [
+        // Search across all relevant fields including answers
+        const basicFields = [
           attendee.profiles?.discord_username || '',
           attendee.profiles?.email || '',
           attendee.events?.name || '',
@@ -309,7 +309,14 @@ export default function AdminPage() {
             hour: '2-digit',
             minute: '2-digit'
           })
-        ].join(' ').toLowerCase()
+        ]
+
+        // Add all answer texts to searchable content
+        const answerTexts = (attendee.answers || []).map((answer: any) => 
+          answer.answer_text || ''
+        )
+
+        const searchableText = [...basicFields, ...answerTexts].join(' ').toLowerCase()
 
         return searchableText.includes(query)
       })
@@ -602,7 +609,7 @@ export default function AdminPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, email, event, status, invite code..."
+                placeholder="Search by name, email, event, status, invite code, or answers..."
                 className="pl-10"
               />
             </div>
