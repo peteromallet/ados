@@ -30,6 +30,7 @@ export default function AdminPage() {
   const [bulkResults, setBulkResults] = useState<any[]>([])
   const [isBulkSubmitting, setIsBulkSubmitting] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeTab, setActiveTab] = useState<'invites' | 'attendees'>('attendees')
 
   useEffect(() => {
     async function checkAdmin() {
@@ -393,7 +394,215 @@ export default function AdminPage() {
           <h1 className="text-4xl font-bold text-gray-900">Admin</h1>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        {/* Tab Navigation */}
+        <div className="flex gap-2 mb-8">
+          <button
+            onClick={() => setActiveTab('attendees')}
+            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+              activeTab === 'attendees'
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Attendees ({attendees.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('invites')}
+            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+              activeTab === 'invites'
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Invites ({invites.length})
+          </button>
+        </div>
+
+        {activeTab === 'attendees' && (
+          <>
+            {/* Attendee Management */}
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Manage Attendees</h2>
+                <Button
+                  onClick={downloadAttendees}
+                  variant="secondary"
+                  className="flex items-center gap-2"
+                  disabled={filterAttendees(attendees).length === 0}
+                >
+                  <Download size={16} />
+                  Download {statusFilter === 'all' ? 'All' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+                </Button>
+              </div>
+              
+              {/* Status Filter */}
+              <div className="flex gap-2 mb-6 flex-wrap">
+                {['pending', 'approved', 'rejected', 'all'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setStatusFilter(status)}
+                    className={`px-4 py-2 rounded-lg font-semibold capitalize transition-colors ${
+                      statusFilter === status
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {status}
+                    <span className="ml-2 text-sm opacity-75">
+                      ({attendees.filter(a => status === 'all' ? true : a.status === status).length})
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Search */}
+              <div className="mb-6 relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by name, email, event, status, invite code, or answers..."
+                    className="pl-10"
+                  />
+                </div>
+                {searchQuery && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Showing {filterAttendees(attendees).length} of {attendees.filter(a => statusFilter === 'all' ? true : a.status === statusFilter).length} {statusFilter !== 'all' && statusFilter} attendees
+                  </p>
+                )}
+              </div>
+
+              {/* Attendees List */}
+              <div className="space-y-4">
+                {filterAttendees(attendees)
+                  .map((attendee) => (
+                      <div key={attendee.id} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex gap-4">
+                          {attendee.profiles?.avatar_url && (
+                            <img 
+                              src={attendee.profiles.avatar_url} 
+                              alt={attendee.profiles.discord_username || 'User'} 
+                              className="w-12 h-12 rounded-full"
+                            />
+                          )}
+                          <div>
+                            {attendee.profiles?.discord_username && (
+                              <>
+                                <h3 className="font-semibold text-gray-900">
+                                  {attendee.profiles.discord_username}
+                                </h3>
+                                <p className="text-sm text-indigo-600 font-medium">
+                                  @{attendee.profiles.discord_username}
+                                </p>
+                              </>
+                            )}
+                            <p className="text-sm text-gray-600">{attendee.profiles?.email}</p>
+                            {attendee.events && (
+                              <p className="text-xs text-purple-600 mt-1">
+                                Event: <span className="font-semibold">{attendee.events.name}</span>
+                              </p>
+                            )}
+                            {attendee.invite_code && (
+                              <p className="text-xs text-blue-600 mt-1">
+                                Invited via: <span className="font-mono">{attendee.invite_code}</span>
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-400 mt-1">
+                              Applied {new Date(attendee.applied_at).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            attendee.status === 'approved' ? 'bg-green-100 text-green-800' :
+                            attendee.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {attendee.status}
+                          </span>
+                          
+                          {attendee.status === 'pending' && (
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={() => updateAttendeeStatus(attendee.id, 'approved')}
+                                disabled={updatingStatus === attendee.id}
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                {updatingStatus === attendee.id ? '...' : 'Approve'}
+                              </Button>
+                              <Button
+                                onClick={() => updateAttendeeStatus(attendee.id, 'rejected')}
+                                disabled={updatingStatus === attendee.id}
+                                size="sm"
+                                variant="secondary"
+                                className="bg-red-100 hover:bg-red-200 text-red-700"
+                              >
+                                {updatingStatus === attendee.id ? '...' : 'Reject'}
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {attendee.status !== 'pending' && (
+                            <Button
+                              onClick={() => updateAttendeeStatus(attendee.id, 'pending')}
+                              disabled={updatingStatus === attendee.id}
+                              size="sm"
+                              variant="secondary"
+                            >
+                              Reset to Pending
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Show answers for pending and approved applications - Full width below */}
+                      {(attendee.status === 'pending' || attendee.status === 'approved') && attendee.answers && attendee.answers.length > 0 && (
+                        <div className="pt-4 border-t border-gray-200">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-3">Responses:</h4>
+                          <div className="space-y-3">
+                            {attendee.answers.map((answer: any) => (
+                              <div key={answer.id} className="bg-gray-50 p-3 rounded-lg">
+                                <p className="text-xs font-semibold text-gray-600 mb-1">
+                                  {answer.questions?.question_text || 'Question'}
+                                </p>
+                                <p className="text-sm text-gray-900">
+                                  {answer.answer_text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                
+                {filterAttendees(attendees).length === 0 && (
+                  <p className="text-gray-500 text-center py-8">
+                    {searchQuery 
+                      ? `No attendees found matching "${searchQuery}"`
+                      : `No ${statusFilter !== 'all' ? statusFilter : ''} attendees found`
+                    }
+                  </p>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'invites' && (
+          <>
+            <div className="bg-white rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Invite</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -566,184 +775,6 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* Attendee Management */}
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Manage Attendees</h2>
-            <Button
-              onClick={downloadAttendees}
-              variant="secondary"
-              className="flex items-center gap-2"
-              disabled={filterAttendees(attendees).length === 0}
-            >
-              <Download size={16} />
-              Download {statusFilter === 'all' ? 'All' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
-            </Button>
-          </div>
-          
-          {/* Status Filter */}
-          <div className="flex gap-2 mb-6 flex-wrap">
-            {['pending', 'approved', 'rejected', 'all'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2 rounded-lg font-semibold capitalize transition-colors ${
-                  statusFilter === status
-                    ? 'bg-black text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {status}
-                <span className="ml-2 text-sm opacity-75">
-                  ({attendees.filter(a => status === 'all' ? true : a.status === status).length})
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Search */}
-          <div className="mb-6 relative">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, email, event, status, invite code, or answers..."
-                className="pl-10"
-              />
-            </div>
-            {searchQuery && (
-              <p className="text-sm text-gray-600 mt-2">
-                Showing {filterAttendees(attendees).length} of {attendees.filter(a => statusFilter === 'all' ? true : a.status === statusFilter).length} {statusFilter !== 'all' && statusFilter} attendees
-              </p>
-            )}
-          </div>
-
-          {/* Attendees List */}
-          <div className="space-y-4">
-            {filterAttendees(attendees)
-              .map((attendee) => (
-                  <div key={attendee.id} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex gap-4">
-                      {attendee.profiles?.avatar_url && (
-                        <img 
-                          src={attendee.profiles.avatar_url} 
-                          alt={attendee.profiles.discord_username || 'User'} 
-                          className="w-12 h-12 rounded-full"
-                        />
-                      )}
-                      <div>
-                        {attendee.profiles?.discord_username && (
-                          <>
-                            <h3 className="font-semibold text-gray-900">
-                              {attendee.profiles.discord_username}
-                            </h3>
-                            <p className="text-sm text-indigo-600 font-medium">
-                              @{attendee.profiles.discord_username}
-                            </p>
-                          </>
-                        )}
-                        <p className="text-sm text-gray-600">{attendee.profiles?.email}</p>
-                        {attendee.events && (
-                          <p className="text-xs text-purple-600 mt-1">
-                            Event: <span className="font-semibold">{attendee.events.name}</span>
-                          </p>
-                        )}
-                        {attendee.invite_code && (
-                          <p className="text-xs text-blue-600 mt-1">
-                            Invited via: <span className="font-mono">{attendee.invite_code}</span>
-                          </p>
-                        )}
-                        <p className="text-xs text-gray-400 mt-1">
-                          Applied {new Date(attendee.applied_at).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric', 
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        attendee.status === 'approved' ? 'bg-green-100 text-green-800' :
-                        attendee.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {attendee.status}
-                      </span>
-                      
-                      {attendee.status === 'pending' && (
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => updateAttendeeStatus(attendee.id, 'approved')}
-                            disabled={updatingStatus === attendee.id}
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            {updatingStatus === attendee.id ? '...' : 'Approve'}
-                          </Button>
-                          <Button
-                            onClick={() => updateAttendeeStatus(attendee.id, 'rejected')}
-                            disabled={updatingStatus === attendee.id}
-                            size="sm"
-                            variant="secondary"
-                            className="bg-red-100 hover:bg-red-200 text-red-700"
-                          >
-                            {updatingStatus === attendee.id ? '...' : 'Reject'}
-                          </Button>
-                        </div>
-                      )}
-                      
-                      {attendee.status !== 'pending' && (
-                        <Button
-                          onClick={() => updateAttendeeStatus(attendee.id, 'pending')}
-                          disabled={updatingStatus === attendee.id}
-                          size="sm"
-                          variant="secondary"
-                        >
-                          Reset to Pending
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Show answers for pending and approved applications - Full width below */}
-                  {(attendee.status === 'pending' || attendee.status === 'approved') && attendee.answers && attendee.answers.length > 0 && (
-                    <div className="pt-4 border-t border-gray-200">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Responses:</h4>
-                      <div className="space-y-3">
-                        {attendee.answers.map((answer: any) => (
-                          <div key={answer.id} className="bg-gray-50 p-3 rounded-lg">
-                            <p className="text-xs font-semibold text-gray-600 mb-1">
-                              {answer.questions?.question_text || 'Question'}
-                            </p>
-                            <p className="text-sm text-gray-900">
-                              {answer.answer_text}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            
-            {filterAttendees(attendees).length === 0 && (
-              <p className="text-gray-500 text-center py-8">
-                {searchQuery 
-                  ? `No attendees found matching "${searchQuery}"`
-                  : `No ${statusFilter !== 'all' ? statusFilter : ''} attendees found`
-                }
-              </p>
-            )}
-          </div>
-        </div>
-
         {/* List of existing invites */}
         <div className="mt-8 bg-white rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Existing Invites</h2>
@@ -817,6 +848,8 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+          </>
+        )}
       </div>
     </div>
   )
