@@ -26,12 +26,19 @@ export async function GET(request: Request) {
       // Create or update profile
       const discordUser = user.user_metadata
       
+      // Debug: Log all available Discord data to see what fields we have
+      console.log('🔍 Discord user_metadata:', JSON.stringify(discordUser, null, 2))
+      console.log('🔍 Available fields:', Object.keys(discordUser))
+      
       // Discord provides: global_name (display name), full_name, name (username), custom_claims.global_name
       // Priority for display name: global_name > full_name > name
       const displayName = discordUser.global_name || discordUser.custom_claims?.global_name || discordUser.full_name || discordUser.name
       
-      // The actual Discord handle/username
-      const handle = discordUser.name || displayName
+      // The actual Discord handle/username - trying different possible fields
+      const handle = discordUser.name || discordUser.user_name || discordUser.username || displayName
+      
+      console.log('📝 Display name:', displayName)
+      console.log('📝 Handle:', handle)
       
       await supabase.from('profiles').upsert({
         id: user.id,
