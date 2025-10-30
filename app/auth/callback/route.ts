@@ -30,20 +30,27 @@ export async function GET(request: Request) {
       console.log('🔍 Discord user_metadata:', JSON.stringify(discordUser, null, 2))
       console.log('🔍 Available fields:', Object.keys(discordUser))
       
-      // Discord provides: global_name (display name), full_name, name (username), custom_claims.global_name
-      // Priority for display name: global_name > full_name > name
+      // Discord fields explained:
+      // - global_name: Display name (e.g., "Nathan Shipley", "Deke")
+      // - name: The actual Discord handle/username (e.g., "nathanshipley", "deke")
+      // - full_name: Usually same as global_name
+      
+      // Display name - what shows prominently
       const displayName = discordUser.global_name || discordUser.custom_claims?.global_name || discordUser.full_name || discordUser.name
       
-      // The actual Discord handle/username - trying different possible fields
-      const handle = discordUser.name || discordUser.user_name || discordUser.username || displayName
+      // Handle - the actual @username (no @ symbol in the data)
+      // The 'name' field is the unique Discord username
+      const handle = discordUser.name || discordUser.username || discordUser.user_name
       
-      console.log('📝 Display name:', displayName)
-      console.log('📝 Handle:', handle)
+      console.log('📝 Display name (global_name):', discordUser.global_name)
+      console.log('📝 Handle (name):', discordUser.name)
+      console.log('📝 Storing display name:', displayName)
+      console.log('📝 Storing handle:', handle)
       
       await supabase.from('profiles').upsert({
         id: user.id,
-        discord_username: displayName,
-        discord_handle: handle,
+        discord_username: displayName,  // Display name (e.g., "Nathan Shipley")
+        discord_handle: handle,          // Actual handle (e.g., "nathanshipley")
         discord_id: discordUser.provider_id,
         avatar_url: discordUser.avatar_url,
         email: user.email,
