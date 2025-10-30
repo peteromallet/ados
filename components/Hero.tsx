@@ -474,6 +474,54 @@ export function Hero() {
               <div className="mt-2">
                 <VibeToggle value={vibe} onChange={handleVibeChange} />
               </div>
+
+              <motion.div 
+                className="mt-6 flex flex-col items-center justify-center gap-3 -ml-[1px]"
+                key={`cohosted-mobile-${vibe}`}
+              >
+                <motion.p 
+                  className={`text-xs font-light uppercase tracking-wider transition-colors duration-300 ${
+                    vibe === 'epic' ? 'text-black/50' : 'text-white/60'
+                  }`}
+                >
+                Cohosted by
+                </motion.p>
+              <div className="flex items-center gap-3">
+                <a href="https://www.asteriafilm.com" target="_blank" rel="noopener noreferrer" className="opacity-75 hover:opacity-100 transition-opacity">
+                    {vibe === 'epic' ? (
+                  <img 
+                    src="/a.png" 
+                    alt="Asteria" 
+                        className="h-5 w-5 object-contain transition-all duration-300 brightness-[0.4] sepia saturate-[3] hue-rotate-[5deg]" 
+                      />
+                    ) : (
+                  <img 
+                    src="/a.png" 
+                    alt="Asteria" 
+                        className="h-5 w-5 object-contain transition-all duration-300 brightness-[2]" 
+                      />
+                    )}
+                  </a>
+                  <motion.span 
+                    className={`text-base transition-colors duration-300 ${vibe === 'epic' ? 'text-black/40' : 'text-white/40'}`}
+                  >×</motion.span>
+                <a href="https://banodoco.ai/" target="_blank" rel="noopener noreferrer" className="opacity-75 hover:opacity-100 transition-opacity">
+                    {vibe === 'epic' ? (
+                  <img 
+                    src="/b.png" 
+                    alt="Banodoco" 
+                        className="h-5 w-5 object-contain transition-all duration-300 brightness-[0.4] sepia saturate-[3] hue-rotate-[5deg]" 
+                      />
+                    ) : (
+                  <img 
+                    src="/b.png" 
+                    alt="Banodoco" 
+                        className="h-5 w-5 object-contain transition-all duration-300 brightness-[2]" 
+                  />
+                    )}
+                </a>
+              </div>
+              </motion.div>
             </div>
           </motion.div>
         </motion.div>
